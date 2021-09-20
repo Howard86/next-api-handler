@@ -102,5 +102,8 @@
     "exclude": [
       "**/*.spec.js"
     ]
+  },
+  "peerDependencies": {
+    "next": "^10"
   }
 }
