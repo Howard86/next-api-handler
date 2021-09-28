@@ -1,9 +1,18 @@
 import type { NextApiHandler, NextApiRequest, NextApiResponse } from 'next';
 
-export type RouterHandler<T = unknown> = (handler: NextApiHandler<T>) => Router;
+export type RouterHandler<T = unknown> = (handler: ApiHandler<T>) => Router;
+
+export type ApiHandler<T = unknown> = (
+  req: NextApiRequest,
+  res?: NextApiResponse
+) => Promise<T>;
+
+export type ApiResponse<T = unknown> = SuccessApiResponse<T> | ErrorApiResponse;
+export type SuccessApiResponse<T> = { success: true; data: T };
+export type ErrorApiResponse = { success: false; message: string };
 
 export default class Router {
-  private readonly route: Record<string, NextApiHandler> = {};
+  private readonly route: Record<string, ApiHandler> = {};
 
   get: RouterHandler;
   head: RouterHandler;
@@ -27,20 +36,35 @@ export default class Router {
     this.put = this.add.bind(this, 'PUT');
   }
 
-  private add<T = unknown>(method: string, handler: NextApiHandler<T>): Router {
+  private add<T = unknown>(method: string, handler: ApiHandler<T>): Router {
     this.route[method] = handler;
     return this;
   }
 
   build(): NextApiHandler {
-    return (req: NextApiRequest, res: NextApiResponse) => {
+    return async (req: NextApiRequest, res: NextApiResponse<ApiResponse>) => {
       const handler = this.route[req.method || 'GET'];
 
       if (!handler) {
-        return res.status(405).send(`Method ${req.method} Not Allowed`);
+        return res.status(405).json({
+          success: false,
+          message: `Method ${req.method} Not Allowed`,
+        });
       }
 
-      return handler(req, res);
+      try {
+        const data = await handler(req, res);
+        return res.status(200).json({
+          success: true,
+          data,
+        });
+      } catch (error) {
+        return res.status(500).json({
+          success: false,
+          message:
+            error instanceof Error ? error.message : 'Internal Server Error',
+        });
+      }
     };
   }
 }
