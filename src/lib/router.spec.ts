@@ -2,7 +2,7 @@ import test from 'ava';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import sinon, { SinonSpiedInstance } from 'sinon';
 
-import Router from './router';
+import Router, { ErrorApiResponse, SuccessApiResponse } from './router';
 
 const req = { method: 'GET' } as NextApiRequest;
 const res = {
@@ -10,7 +10,7 @@ const res = {
     return this;
   },
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  send(_data: unknown) {},
+  json(_data: unknown) {},
 } as unknown as NextApiResponse;
 
 let spy: SinonSpiedInstance<typeof res>;
@@ -28,18 +28,26 @@ test('should return 405 for empty GET route', async (t) => {
   const handler = router.build();
   await handler(req, res);
   t.true(spy.status.calledWith(405));
-  t.true(spy.send.calledWith('Method GET Not Allowed'));
+  t.true(
+    spy.json.calledWith({
+      success: false,
+      message: 'Method GET Not Allowed',
+    } as ErrorApiResponse)
+  );
 });
 
 test('should return value controlled by predefined handler', async (t) => {
   const TEXT = 'GET_RESPONSE';
 
-  router.get((_req, res) => {
-    return res.status(200).send(TEXT);
-  });
+  router.get<string>((_req) => TEXT);
 
   const handler = router.build();
   await handler(req, res);
   t.true(spy.status.calledWith(200));
-  t.true(spy.send.calledWith(TEXT));
+  t.true(
+    spy.json.calledWith({
+      success: true,
+      data: TEXT,
+    } as SuccessApiResponse<string>)
+  );
 });
