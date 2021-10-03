@@ -2,7 +2,7 @@ import test from 'ava';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import sinon, { SinonSpiedInstance } from 'sinon';
 
-import Router, { ErrorApiResponse, SuccessApiResponse } from './router';
+import { ErrorApiResponse, RouterBuilder, SuccessApiResponse } from './router';
 
 const req = { method: 'GET' } as NextApiRequest;
 const res = {
@@ -14,14 +14,14 @@ const res = {
 } as unknown as NextApiResponse;
 
 let spy: SinonSpiedInstance<typeof res>;
-let router: Router;
+let router: RouterBuilder;
 
 test.before(() => {
   spy = sinon.spy(res);
 });
 
 test.beforeEach(() => {
-  router = new Router();
+  router = new RouterBuilder();
 });
 
 test('should return 405 for empty GET route', async (t) => {
