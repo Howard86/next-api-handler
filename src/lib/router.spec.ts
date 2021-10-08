@@ -1,10 +1,15 @@
 import test from 'ava';
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiResponse } from 'next';
 import sinon from 'sinon';
 
-import { ErrorApiResponse, RouterBuilder, SuccessApiResponse } from './router';
+import {
+  ErrorApiResponse,
+  NextApiRequestWithMiddleware,
+  RouterBuilder,
+  SuccessApiResponse,
+} from './router';
 
-const ROUTING_METHODS: (keyof RouterBuilder)[] = [
+const ROUTING_METHODS = [
   'get',
   'head',
   'patch',
@@ -14,7 +19,8 @@ const ROUTING_METHODS: (keyof RouterBuilder)[] = [
   'trace',
   'post',
   'put',
-];
+] as const;
+
 const res = {
   status(_statusCode: number) {
     return this;
@@ -35,6 +41,7 @@ test.beforeEach(() => {
 
 test.afterEach(() => {
   spiedJson.restore();
+  spiedStatus.restore();
 });
 
 test('should return 405 for all empty routes', async (t) => {
@@ -43,7 +50,7 @@ test('should return 405 for all empty routes', async (t) => {
   await Promise.all(
     ROUTING_METHODS.map((method) => method.toUpperCase()).map(
       async (method) => {
-        await handler({ method } as NextApiRequest, res);
+        await handler({ method } as NextApiRequestWithMiddleware, res);
         t.true(spiedStatus.calledWith(405));
         t.true(
           spiedJson.calledWith({
@@ -60,10 +67,12 @@ test('should return value controlled by predefined handler', async (t) => {
   await Promise.all(
     ROUTING_METHODS.map(async (method) => {
       const TEXT = `${method.toUpperCase()}_API_RESPONSE`;
-      // const router = new RouterBuilder();
       router[method]((_req) => TEXT);
       const handler = router.build();
-      await handler({ method: method.toUpperCase() } as NextApiRequest, res);
+      await handler(
+        { method: method.toUpperCase() } as NextApiRequestWithMiddleware,
+        res
+      );
       t.true(spiedStatus.calledWith(200));
       t.true(
         spiedJson.calledWith({
@@ -79,12 +88,14 @@ test('should handle errors', async (t) => {
   await Promise.all(
     ROUTING_METHODS.map(async (method) => {
       const error = new Error(`${method.toUpperCase()}_API_ERROR`);
-      // const router = new RouterBuilder();
       router[method]((_req) => {
         throw error;
       });
       const handler = router.build();
-      await handler({ method: method.toUpperCase() } as NextApiRequest, res);
+      await handler(
+        { method: method.toUpperCase() } as NextApiRequestWithMiddleware,
+        res
+      );
       t.true(spiedStatus.calledWith(500));
       t.true(
         spiedJson.calledWith({
@@ -100,10 +111,12 @@ test('should handle asynchronous request', async (t) => {
   await Promise.all(
     ROUTING_METHODS.map(async (method) => {
       const TEXT = `${method.toUpperCase()}_API_RESPONSE`;
-      // const router = new RouterBuilder();
       router[method]((_req) => Promise.resolve(TEXT));
       const handler = router.build();
-      await handler({ method: method.toUpperCase() } as NextApiRequest, res);
+      await handler(
+        { method: method.toUpperCase() } as NextApiRequestWithMiddleware,
+        res
+      );
       t.true(spiedStatus.calledWith(200));
       t.true(
         spiedJson.calledWith({
@@ -119,10 +132,12 @@ test('should handle errors thrown by asynchronous request', async (t) => {
   await Promise.all(
     ROUTING_METHODS.map(async (method) => {
       const error = new Error(`${method.toUpperCase()}_API_ERROR`);
-      // const router = new RouterBuilder();
       router[method]((_req) => Promise.reject(error));
       const handler = router.build();
-      await handler({ method: method.toUpperCase() } as NextApiRequest, res);
+      await handler(
+        { method: method.toUpperCase() } as NextApiRequestWithMiddleware,
+        res
+      );
       t.true(spiedStatus.calledWith(500));
       t.true(
         spiedJson.calledWith({
@@ -130,6 +145,68 @@ test('should handle errors thrown by asynchronous request', async (t) => {
           message: error.message,
         } as ErrorApiResponse)
       );
+    })
+  );
+});
+
+type FakeCookie = {
+  testCookie: string;
+};
+
+type FakeUser = {
+  user: {
+    id: string;
+    name: string;
+    testCookie: string;
+  };
+};
+
+test('should accept middleware and receive values from request', async (t) => {
+  router.get((req) => req.middleware);
+  const handler = router.build();
+
+  const cookieMiddleware = (
+    _req: NextApiRequestWithMiddleware
+  ): FakeCookie => ({
+    testCookie: 'TEST_COOKIE',
+  });
+  router.use<FakeCookie>(cookieMiddleware);
+
+  await handler({ method: 'GET' } as NextApiRequestWithMiddleware, res);
+  t.true(spiedStatus.calledWith(200));
+  t.true(
+    spiedJson.calledWith({
+      success: true,
+      data: {
+        testCookie: 'TEST_COOKIE',
+      },
+    })
+  );
+
+  const userMiddleware = (req: NextApiRequestWithMiddleware): FakeUser => ({
+    user: {
+      id: '1',
+      name: 'TEST_USER',
+      testCookie: req.middleware.testCookie as string,
+    },
+  });
+
+  router.use<FakeUser>(userMiddleware);
+
+  await handler({ method: 'GET' } as NextApiRequestWithMiddleware, res);
+
+  t.true(spiedStatus.calledWith(200));
+  t.true(
+    spiedJson.calledWith({
+      success: true,
+      data: {
+        testCookie: 'TEST_COOKIE',
+        user: {
+          id: '1',
+          name: 'TEST_USER',
+          testCookie: 'TEST_COOKIE',
+        },
+      },
     })
   );
 });
