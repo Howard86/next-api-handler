@@ -1,21 +1,31 @@
-import type { NextApiHandler, NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiRequest, NextApiResponse } from 'next';
 
 /**
  *  public builder method of RouterBuilder that accepts next.js handler
  *  and return RouterBuilder itself
  */
 export type RouterHandler<T = unknown> = (
-  handler: NextHandler<T>
+  handler: NextApiHandler<T>
 ) => RouterBuilder;
 
 /**
  *  a standard next.js api handler,
  *  see [official doc](https://nextjs.org/docs/api-routes/introduction) for more details
  */
-export type NextHandler<T = unknown> = (
-  req: NextApiRequest,
+export type NextApiHandler<T = unknown> = (
+  req: NextApiRequestWithMiddleware,
   res?: NextApiResponse
 ) => T | Promise<T>;
+
+export interface NextApiRequestWithMiddleware<T = unknown>
+  extends NextApiRequest {
+  middleware: Record<string, T>;
+}
+
+export type NextApiHandlerWithMiddleware<T = unknown, M = unknown> = (
+  req: NextApiRequestWithMiddleware<M>,
+  res: NextApiResponse<T>
+) => void | Promise<void>;
 
 /**
  *  all api response combines success response & error response
@@ -60,46 +70,58 @@ export type ErrorApiResponse = { success: false; message: string };
  * @returns a builder that can build a next.js api handler.
  */
 export class RouterBuilder {
-  private readonly route: Record<string, NextHandler> = {};
+  private readonly route: Record<string, NextApiHandler> = {};
+  private readonly middlewareQueue: NextApiHandler<Record<string, unknown>>[] =
+    [];
 
-  get<T = unknown>(handler: NextHandler<T>): RouterBuilder {
+  get<T = unknown>(handler: NextApiHandler<T>): RouterBuilder {
     return this.add('GET', handler);
   }
 
-  head<T = unknown>(handler: NextHandler<T>): RouterBuilder {
+  head<T = unknown>(handler: NextApiHandler<T>): RouterBuilder {
     return this.add('HEAD', handler);
   }
 
-  patch<T = unknown>(handler: NextHandler<T>): RouterBuilder {
+  patch<T = unknown>(handler: NextApiHandler<T>): RouterBuilder {
     return this.add('PATCH', handler);
   }
 
-  options<T = unknown>(handler: NextHandler<T>): RouterBuilder {
+  options<T = unknown>(handler: NextApiHandler<T>): RouterBuilder {
     return this.add('OPTIONS', handler);
   }
 
-  connect<T = unknown>(handler: NextHandler<T>): RouterBuilder {
+  connect<T = unknown>(handler: NextApiHandler<T>): RouterBuilder {
     return this.add('CONNECT', handler);
   }
 
-  delete<T = unknown>(handler: NextHandler<T>): RouterBuilder {
+  delete<T = unknown>(handler: NextApiHandler<T>): RouterBuilder {
     return this.add('DELETE', handler);
   }
 
-  trace<T = unknown>(handler: NextHandler<T>): RouterBuilder {
+  trace<T = unknown>(handler: NextApiHandler<T>): RouterBuilder {
     return this.add('TRACE', handler);
   }
 
-  post<T = unknown>(handler: NextHandler<T>): RouterBuilder {
+  post<T = unknown>(handler: NextApiHandler<T>): RouterBuilder {
     return this.add('POST', handler);
   }
 
-  put<T = unknown>(handler: NextHandler<T>): RouterBuilder {
+  put<T = unknown>(handler: NextApiHandler<T>): RouterBuilder {
     return this.add('PUT', handler);
   }
 
-  build(): NextApiHandler {
-    return async (req: NextApiRequest, res: NextApiResponse<ApiResponse>) => {
+  use<T extends Record<string, unknown> = Record<string, unknown>>(
+    handler: NextApiHandler<T>
+  ): RouterBuilder {
+    this.middlewareQueue.push(handler);
+    return this;
+  }
+
+  build(): NextApiHandlerWithMiddleware {
+    return async (
+      req: NextApiRequestWithMiddleware,
+      res: NextApiResponse<ApiResponse>
+    ) => {
       const handler = this.route[req.method as string];
 
       if (!handler) {
@@ -110,6 +132,11 @@ export class RouterBuilder {
       }
 
       try {
+        for (const middleware of this.middlewareQueue) {
+          const middlewareValue = await Promise.resolve(middleware(req, res));
+          req.middleware = { ...req.middleware, ...middlewareValue };
+        }
+
         const data = await Promise.resolve(handler(req, res));
         return res.status(200).json({
           success: true,
@@ -126,7 +153,7 @@ export class RouterBuilder {
 
   private add<T = unknown>(
     method: string,
-    handler: NextHandler<T>
+    handler: NextApiHandler<T>
   ): RouterBuilder {
     this.route[method] = handler;
     return this;
