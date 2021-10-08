@@ -1,6 +1,6 @@
 {
   "name": "next-api-handler",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "description": "lightweight nextjs api handler wrapper, portable & configurable for serverless environment",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",
