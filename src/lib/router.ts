@@ -100,7 +100,7 @@ export class RouterBuilder {
 
   build(): NextApiHandler {
     return async (req: NextApiRequest, res: NextApiResponse<ApiResponse>) => {
-      const handler = this.route[req.method || 'GET'];
+      const handler = this.route[req.method as string];
 
       if (!handler) {
         return res.status(405).json({
@@ -110,7 +110,7 @@ export class RouterBuilder {
       }
 
       try {
-        const data = await handler(req, res);
+        const data = await Promise.resolve(handler(req, res));
         return res.status(200).json({
           success: true,
           data,
@@ -118,8 +118,7 @@ export class RouterBuilder {
       } catch (error) {
         return res.status(500).json({
           success: false,
-          message:
-            error instanceof Error ? error.message : 'Internal Server Error',
+          message: (error as Error).message,
         });
       }
     };
