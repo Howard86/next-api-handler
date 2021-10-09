@@ -9,19 +9,25 @@ export type RouterHandler<T = unknown> = (
 ) => RouterBuilder;
 
 /**
- *  a standard next.js api handler,
- *  see [official doc](https://nextjs.org/docs/api-routes/introduction) for more details
+ *  a sync/async function that takes next.js request and optional next.js response
  */
 export type NextApiHandler<T = unknown> = (
   req: NextApiRequestWithMiddleware,
   res?: NextApiResponse
 ) => T | Promise<T>;
 
+/**
+ *  a next.js api request with injected req.middleware
+ */
 export interface NextApiRequestWithMiddleware<T = unknown>
   extends NextApiRequest {
   middleware: Record<string, T>;
 }
 
+/**
+ *  a standard next.js api handler but with req.middleware available
+ *  see [official doc](https://nextjs.org/docs/api-routes/introduction) for more details
+ */
 export type NextApiHandlerWithMiddleware<T = unknown, M = unknown> = (
   req: NextApiRequestWithMiddleware<M>,
   res: NextApiResponse<T>
