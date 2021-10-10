@@ -137,10 +137,11 @@ export class RouterBuilder {
         });
       }
 
+      req.middleware = {};
+
       try {
-        for (const middleware of this.middlewareQueue) {
-          const middlewareValue = await Promise.resolve(middleware(req, res));
-          req.middleware = { ...req.middleware, ...middlewareValue };
+        if (this.middlewareQueue.length > 0) {
+          await this.handleMiddlewareQueue(req, res);
         }
 
         const data = await Promise.resolve(handler(req, res));
@@ -157,6 +158,18 @@ export class RouterBuilder {
     };
   }
 
+  private async handleMiddlewareQueue(
+    req: NextApiRequestWithMiddleware,
+    res: NextApiResponse<ApiResponse>
+  ): Promise<void> {
+    for (const middleware of this.middlewareQueue) {
+      const middlewareValue = await Promise.resolve(middleware(req, res));
+
+      for (const middlewareKey of Object.keys(middlewareValue)) {
+        req.middleware[middlewareKey] = middlewareValue[middlewareKey];
+      }
+    }
+  }
   private add<T = unknown>(
     method: string,
     handler: NextApiHandler<T>
