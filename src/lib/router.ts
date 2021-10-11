@@ -77,6 +77,8 @@ export type ErrorApiResponse = { success: false; message: string };
  */
 export class RouterBuilder {
   private readonly route: Record<string, NextApiHandler> = {};
+  private readonly middlewareList: NextApiHandler<Record<string, unknown>>[] =
+    [];
   private readonly middlewareQueue: NextApiHandler<Record<string, unknown>>[] =
     [];
 
@@ -123,6 +125,13 @@ export class RouterBuilder {
     return this;
   }
 
+  inject<T extends Record<string, unknown> = Record<string, unknown>>(
+    handler: NextApiHandler<T>
+  ): RouterBuilder {
+    this.middlewareList.push(handler);
+    return this;
+  }
+
   build(): NextApiHandlerWithMiddleware {
     return async (
       req: NextApiRequestWithMiddleware,
@@ -140,6 +149,10 @@ export class RouterBuilder {
       req.middleware = {};
 
       try {
+        if (this.middlewareList.length > 0) {
+          await this.handleMiddlewareList(req, res);
+        }
+
         if (this.middlewareQueue.length > 0) {
           await this.handleMiddlewareQueue(req, res);
         }
@@ -170,6 +183,22 @@ export class RouterBuilder {
       }
     }
   }
+
+  private async handleMiddlewareList(
+    req: NextApiRequestWithMiddleware,
+    res: NextApiResponse<ApiResponse>
+  ): Promise<void> {
+    await Promise.all(
+      this.middlewareList.map(async (middleware) => {
+        const middlewareValue = await Promise.resolve(middleware(req, res));
+
+        for (const middlewareKey of Object.keys(middlewareValue)) {
+          req.middleware[middlewareKey] = middlewareValue[middlewareKey];
+        }
+      })
+    );
+  }
+
   private add<T = unknown>(
     method: string,
     handler: NextApiHandler<T>
