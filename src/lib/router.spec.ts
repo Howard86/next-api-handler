@@ -170,7 +170,7 @@ type FakeUser = {
 };
 
 test.serial(
-  'should accept middleware and receive values from request',
+  'should accept middleware in sequence and receive values from request',
   async (t) => {
     router.get((req) => req.middleware);
     const handler = router.build();
@@ -201,6 +201,90 @@ test.serial(
       },
     });
 
+    router.use<FakeUser>(userMiddleware);
+
+    await handler({ method: 'GET' } as NextApiRequestWithMiddleware, res);
+
+    t.true(spiedStatus.calledWith(200));
+    t.true(
+      spiedJson.calledWith({
+        success: true,
+        data: {
+          testCookie: 'TEST_COOKIE',
+          user: {
+            id: '1',
+            name: 'TEST_USER',
+            testCookie: 'TEST_COOKIE',
+          },
+        },
+      })
+    );
+  }
+);
+
+test.serial(
+  'should accept middleware in parallel and receive values from request',
+  async (t) => {
+    router.get((req) => req.middleware);
+    const handler = router.build();
+
+    const cookieMiddleware = (
+      _req: NextApiRequestWithMiddleware
+    ): FakeCookie => ({
+      testCookie: 'TEST_COOKIE',
+    });
+
+    const userMiddleware = (_req: NextApiRequestWithMiddleware): FakeUser => ({
+      user: {
+        id: '1',
+        name: 'TEST_USER',
+        testCookie: 'ANOTHER_TEST_COOKIE',
+      },
+    });
+
+    router.inject<FakeCookie>(cookieMiddleware);
+    router.inject<FakeUser>(userMiddleware);
+
+    await handler({ method: 'GET' } as NextApiRequestWithMiddleware, res);
+
+    t.true(spiedStatus.calledWith(200));
+    t.true(
+      spiedJson.calledWith({
+        success: true,
+        data: {
+          testCookie: 'TEST_COOKIE',
+          user: {
+            id: '1',
+            name: 'TEST_USER',
+            testCookie: 'ANOTHER_TEST_COOKIE',
+          },
+        },
+      })
+    );
+  }
+);
+
+test.serial(
+  'should accept middleware both in parallel & sequence and receive values from request',
+  async (t) => {
+    router.get((req) => req.middleware);
+    const handler = router.build();
+
+    const cookieMiddleware = (
+      _req: NextApiRequestWithMiddleware
+    ): FakeCookie => ({
+      testCookie: 'TEST_COOKIE',
+    });
+
+    const userMiddleware = (req: NextApiRequestWithMiddleware): FakeUser => ({
+      user: {
+        id: '1',
+        name: 'TEST_USER',
+        testCookie: req.middleware.testCookie as string,
+      },
+    });
+
+    router.inject<FakeCookie>(cookieMiddleware);
     router.use<FakeUser>(userMiddleware);
 
     await handler({ method: 'GET' } as NextApiRequestWithMiddleware, res);
