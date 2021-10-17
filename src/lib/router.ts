@@ -1,34 +1,34 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 /**
- *  public builder method of RouterBuilder that accepts next.js handler
- *  and return RouterBuilder itself
+ *  an utility type to shorten writing Record<string, T = unknown>
  */
-export type RouterHandler<T = unknown> = (
-  handler: NextApiHandler<T>
-) => RouterBuilder;
+export type TypedObject<T = unknown> = Record<string, T>;
 
 /**
  *  a sync/async function that takes next.js request and optional next.js response
  */
-export type NextApiHandler<T = unknown> = (
-  req: NextApiRequestWithMiddleware,
+export type NextApiHandler<T = unknown, M extends TypedObject = TypedObject> = (
+  req: NextApiRequestWithMiddleware<M>,
   res?: NextApiResponse
 ) => T | Promise<T>;
 
 /**
  *  a next.js api request with injected req.middleware
  */
-export interface NextApiRequestWithMiddleware<T = unknown>
+export interface NextApiRequestWithMiddleware<T = TypedObject>
   extends NextApiRequest {
-  middleware: Record<string, T>;
+  middleware: T;
 }
 
 /**
  *  a standard next.js api handler but with req.middleware available
  *  see [official doc](https://nextjs.org/docs/api-routes/introduction) for more details
  */
-export type NextApiHandlerWithMiddleware<T = unknown, M = unknown> = (
+export type NextApiHandlerWithMiddleware<
+  T = unknown,
+  M extends TypedObject = TypedObject
+> = (
   req: NextApiRequestWithMiddleware<M>,
   res: NextApiResponse<T>
 ) => void | Promise<void>;
@@ -76,56 +76,73 @@ export type ErrorApiResponse = { success: false; message: string };
  * @returns a builder that can build a next.js api handler.
  */
 export class RouterBuilder {
-  private readonly route: Record<string, NextApiHandler> = {};
-  private readonly middlewareList: NextApiHandler<Record<string, unknown>>[] =
-    [];
-  private readonly middlewareQueue: NextApiHandler<Record<string, unknown>>[] =
-    [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private readonly route: Record<string, NextApiHandler<unknown, any>> = {};
+  private readonly middlewareList: NextApiHandler<TypedObject>[] = [];
+  private readonly middlewareQueue: NextApiHandler<TypedObject>[] = [];
 
-  get<T = unknown>(handler: NextApiHandler<T>): RouterBuilder {
+  get<T = unknown, M extends TypedObject = TypedObject>(
+    handler: NextApiHandler<T, M>
+  ): RouterBuilder {
     return this.add('GET', handler);
   }
 
-  head<T = unknown>(handler: NextApiHandler<T>): RouterBuilder {
+  head<T = unknown, M extends TypedObject = TypedObject>(
+    handler: NextApiHandler<T, M>
+  ): RouterBuilder {
     return this.add('HEAD', handler);
   }
 
-  patch<T = unknown>(handler: NextApiHandler<T>): RouterBuilder {
+  patch<T = unknown, M extends TypedObject = TypedObject>(
+    handler: NextApiHandler<T, M>
+  ): RouterBuilder {
     return this.add('PATCH', handler);
   }
 
-  options<T = unknown>(handler: NextApiHandler<T>): RouterBuilder {
+  options<T = unknown, M extends TypedObject = TypedObject>(
+    handler: NextApiHandler<T, M>
+  ): RouterBuilder {
     return this.add('OPTIONS', handler);
   }
 
-  connect<T = unknown>(handler: NextApiHandler<T>): RouterBuilder {
+  connect<T = unknown, M extends TypedObject = TypedObject>(
+    handler: NextApiHandler<T, M>
+  ): RouterBuilder {
     return this.add('CONNECT', handler);
   }
 
-  delete<T = unknown>(handler: NextApiHandler<T>): RouterBuilder {
+  delete<T = unknown, M extends TypedObject = TypedObject>(
+    handler: NextApiHandler<T, M>
+  ): RouterBuilder {
     return this.add('DELETE', handler);
   }
 
-  trace<T = unknown>(handler: NextApiHandler<T>): RouterBuilder {
+  trace<T = unknown, M extends TypedObject = TypedObject>(
+    handler: NextApiHandler<T, M>
+  ): RouterBuilder {
     return this.add('TRACE', handler);
   }
 
-  post<T = unknown>(handler: NextApiHandler<T>): RouterBuilder {
+  post<T = unknown, M extends TypedObject = TypedObject>(
+    handler: NextApiHandler<T, M>
+  ): RouterBuilder {
     return this.add('POST', handler);
   }
 
-  put<T = unknown>(handler: NextApiHandler<T>): RouterBuilder {
+  put<T = unknown, M extends TypedObject = TypedObject>(
+    handler: NextApiHandler<T, M>
+  ): RouterBuilder {
     return this.add('PUT', handler);
   }
 
-  use<T extends Record<string, unknown> = Record<string, unknown>>(
+  use<T extends TypedObject = TypedObject>(
     handler: NextApiHandler<T>
   ): RouterBuilder {
     this.middlewareQueue.push(handler);
     return this;
   }
 
-  inject<T extends Record<string, unknown> = Record<string, unknown>>(
+  inject<T extends TypedObject = TypedObject>(
     handler: NextApiHandler<T>
   ): RouterBuilder {
     this.middlewareList.push(handler);
@@ -199,9 +216,9 @@ export class RouterBuilder {
     );
   }
 
-  private add<T = unknown>(
+  private add<T = unknown, M extends TypedObject = TypedObject>(
     method: string,
-    handler: NextApiHandler<T>
+    handler: NextApiHandler<T, M>
   ): RouterBuilder {
     this.route[method] = handler;
     return this;
