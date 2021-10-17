@@ -19,16 +19,19 @@ export type NextApiHandler<T = unknown> = (
 /**
  *  a next.js api request with injected req.middleware
  */
-export interface NextApiRequestWithMiddleware<T = unknown>
+export interface NextApiRequestWithMiddleware<T = Record<string, unknown>>
   extends NextApiRequest {
-  middleware: Record<string, T>;
+  middleware: T;
 }
 
 /**
  *  a standard next.js api handler but with req.middleware available
  *  see [official doc](https://nextjs.org/docs/api-routes/introduction) for more details
  */
-export type NextApiHandlerWithMiddleware<T = unknown, M = unknown> = (
+export type NextApiHandlerWithMiddleware<
+  T = unknown,
+  M = Record<string, unknown>
+> = (
   req: NextApiRequestWithMiddleware<M>,
   res: NextApiResponse<T>
 ) => void | Promise<void>;
