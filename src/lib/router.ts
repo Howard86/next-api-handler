@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
-import { ApiErrorHandler, errorHandler } from './error-handler';
+import { ApiErrorHandler, makeErrorHandler } from './error-handler';
 import { MethodNotAllowedException } from './http-exceptions';
 
 /**
@@ -56,6 +56,7 @@ export type ErrorApiResponse = { success: false; message: string };
  */
 export type RouterOptions = Partial<{
   error: ApiErrorHandler;
+  shoeMessage: boolean;
 }>;
 
 /**
@@ -93,7 +94,13 @@ export class RouterBuilder {
   private readonly routerOptions = {} as Required<RouterOptions>;
 
   constructor(options: RouterOptions = {}) {
-    this.routerOptions.error = options.error || errorHandler;
+    this.routerOptions.error =
+      options.error ||
+      makeErrorHandler(
+        typeof options.shoeMessage === 'boolean'
+          ? options.shoeMessage
+          : process.env.NODE !== 'production'
+      );
   }
 
   get<T = unknown, M extends TypedObject = TypedObject>(
