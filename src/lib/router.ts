@@ -1,5 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
+import { ApiErrorHandler, errorHandler } from './error-handler';
+import { MethodNotAllowedException } from './http-exceptions';
+
 /**
  *  an utility type to shorten writing Record<string, T = unknown>
  */
@@ -49,6 +52,13 @@ export type SuccessApiResponse<T> = { success: true; data: T };
 export type ErrorApiResponse = { success: false; message: string };
 
 /**
+ * RouterBuilder options
+ */
+export type RouterOptions = Partial<{
+  error: ApiErrorHandler;
+}>;
+
+/**
  * A router builder is next api handler builder that expose express-like api.
  *
  * ### Example (basic usage)
@@ -80,6 +90,11 @@ export class RouterBuilder {
   private readonly route: Record<string, NextApiHandler<unknown, any>> = {};
   private readonly middlewareList: NextApiHandler<TypedObject>[] = [];
   private readonly middlewareQueue: NextApiHandler<TypedObject>[] = [];
+  private readonly routerOptions = {} as Required<RouterOptions>;
+
+  constructor(options: RouterOptions = {}) {
+    this.routerOptions.error = options.error || errorHandler;
+  }
 
   get<T = unknown, M extends TypedObject = TypedObject>(
     handler: NextApiHandler<T, M>
@@ -154,18 +169,17 @@ export class RouterBuilder {
       req: NextApiRequestWithMiddleware,
       res: NextApiResponse<ApiResponse>
     ) => {
-      const handler = this.route[req.method as string];
-
-      if (!handler) {
-        return res.status(405).json({
-          success: false,
-          message: `Method ${req.method} Not Allowed`,
-        });
-      }
-
-      req.middleware = {};
-
       try {
+        const handler = this.route[req.method as string];
+
+        if (!handler) {
+          throw new MethodNotAllowedException(
+            `Method ${req.method} Not Allowed`
+          );
+        }
+
+        req.middleware = {};
+
         if (this.middlewareList.length > 0) {
           await this.handleMiddlewareList(req, res);
         }
@@ -180,10 +194,7 @@ export class RouterBuilder {
           data,
         });
       } catch (error) {
-        return res.status(500).json({
-          success: false,
-          message: (error as Error).message,
-        });
+        this.routerOptions.error(req, res, error as Error);
       }
     };
   }
