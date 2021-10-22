@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.4](https://github.com/Howard86/next-api-handler/compare/v0.0.3...v0.0.4) (2021-10-22)
+
+
+### Features
+
+* **config:** create npm-release GitHub actions ([cc4b2e3](https://github.com/Howard86/next-api-handler/commit/cc4b2e34b0b331df084115c2350dcaaafde6c6c0))
+* **error:** add error handler in Router options ([8b91624](https://github.com/Howard86/next-api-handler/commit/8b916244750183a01b4e7da3cf050802f2e2cfdb))
+* **error:** add http-exception class with predefined error ([8abd770](https://github.com/Howard86/next-api-handler/commit/8abd7704fc0c2dd8a1065564db93226ce6cff42f))
+* **error:** add showMessage options to handle returned message ([1bc3f06](https://github.com/Howard86/next-api-handler/commit/1bc3f065273f94c20a191eeefd2bd03db8635ef1))
+
 ### [0.0.3](https://github.com/Howard86/next-api-handler/compare/v0.0.2...v0.0.3) (2021-10-17)
 
 
