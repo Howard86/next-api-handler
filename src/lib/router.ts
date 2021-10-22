@@ -177,7 +177,7 @@ export class RouterBuilder {
       res: NextApiResponse<ApiResponse>
     ) => {
       try {
-        const handler = this.route[req.method as string];
+        const handler = this.route[req.method || 'GET'];
 
         if (!handler) {
           throw new MethodNotAllowedException(
