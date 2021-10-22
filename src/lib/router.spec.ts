@@ -46,6 +46,42 @@ test.afterEach(() => {
   spiedStatus.restore();
 });
 
+test.serial('should accept showError options when its true', async (t) => {
+  router = new RouterBuilder({ shoeMessage: true });
+
+  router.get(() => {
+    throw new Error('TEST_ERROR');
+  });
+
+  const handler = router.build();
+  await handler({} as NextApiRequestWithMiddleware, res);
+  t.true(spiedStatus.calledWith(500));
+  t.true(
+    spiedJson.calledWith({
+      success: false,
+      message: 'TEST_ERROR',
+    } as ErrorApiResponse)
+  );
+});
+
+test.serial('should accept showError options when its false', async (t) => {
+  router = new RouterBuilder({ shoeMessage: false });
+
+  router.get(() => {
+    throw new Error('TEST_ERROR');
+  });
+
+  const handler = router.build();
+  await handler({} as NextApiRequestWithMiddleware, res);
+  t.true(spiedStatus.calledWith(500));
+  t.true(
+    spiedJson.calledWith({
+      success: false,
+      message: 'Internal Server Error',
+    } as ErrorApiResponse)
+  );
+});
+
 test.serial('should return 405 for all empty routes', async (t) => {
   const handler = router.build();
 
