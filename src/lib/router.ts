@@ -99,7 +99,7 @@ export class RouterBuilder {
       makeErrorHandler(
         typeof options.shoeMessage === 'boolean'
           ? options.shoeMessage
-          : process.env.NODE !== 'production'
+          : process.env.NODE_ENV !== 'production'
       );
   }
 
