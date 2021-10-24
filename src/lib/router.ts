@@ -17,6 +17,23 @@ export type NextApiHandler<T = unknown, M extends TypedObject = TypedObject> = (
 ) => T | Promise<T>;
 
 /**
+ *  a next.js api request with pre-defined query for usage of req.query
+ */
+export interface NextApiRequestWithQuery<
+  T extends TypedObject<string | string[]>
+> extends NextApiRequest {
+  query: T;
+}
+
+/**
+ *  a next.js api request with pre-defined body for usage of req.body
+ */
+export interface NextApiRequestWithBody<T extends TypedObject>
+  extends NextApiRequest {
+  body: T;
+}
+
+/**
  *  a next.js api request with injected req.middleware
  */
 export interface NextApiRequestWithMiddleware<T = TypedObject>
@@ -180,6 +197,7 @@ export class RouterBuilder {
         const handler = this.route[req.method || 'GET'];
 
         if (!handler) {
+          res.setHeader('Allow', Object.keys(this.route));
           throw new MethodNotAllowedException(
             `Method ${req.method} Not Allowed`
           );
