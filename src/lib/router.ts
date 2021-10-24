@@ -180,6 +180,7 @@ export class RouterBuilder {
         const handler = this.route[req.method || 'GET'];
 
         if (!handler) {
+          res.setHeader('Allow', Object.keys(this.route));
           throw new MethodNotAllowedException(
             `Method ${req.method} Not Allowed`
           );
