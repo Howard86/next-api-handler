@@ -22,6 +22,9 @@ const ROUTING_METHODS = [
 ] as const;
 
 const res = {
+  setHeader(_text: string, _allowedMethods: string[]) {
+    return;
+  },
   status(_statusCode: number) {
     return this;
   },
@@ -84,11 +87,13 @@ test.serial('should accept showError options when its false', async (t) => {
 
 test.serial('should return 405 for all empty routes', async (t) => {
   const handler = router.build();
+  const spiedSetHeader = sinon.spy(res, 'setHeader');
 
   await Promise.all(
     ROUTING_METHODS.map((method) => method.toUpperCase()).map(
       async (method) => {
         await handler({ method } as NextApiRequestWithMiddleware, res);
+        t.true(spiedSetHeader.calledWith('Allow', []));
         t.true(spiedStatus.calledWith(405));
         t.true(
           spiedJson.calledWith({
