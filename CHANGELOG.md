@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.7](https://github.com/Howard86/next-api-handler/compare/v0.0.6...v0.0.7) (2021-11-05)
+
+
+### Features
+
+* **example:** add /api/before & /api/after apis for comparison ([0a81e2c](https://github.com/Howard86/next-api-handler/commit/0a81e2c25456db2aded39d6bce8e7c4405364e92))
+
 ### [0.0.6](https://github.com/Howard86/next-api-handler/compare/v0.0.5...v0.0.6) (2021-10-24)
 
 ### [0.0.5](https://github.com/Howard86/next-api-handler/compare/v0.0.4...v0.0.5) (2021-10-23)

@@ -1963,6 +1963,11 @@ native-url@0.3.4:
   dependencies:
     querystring "^0.2.0"
 
+next-api-handler@^0.0.6:
+  version "0.0.6"
+  resolved "https://registry.yarnpkg.com/next-api-handler/-/next-api-handler-0.0.6.tgz#f239967701e7c521bb5f74a5140d6feb06e15904"
+  integrity sha512-LwYfIe12jEWuWQbiBMprgcw6mWoyV92+dsvhqGkxLWo7ADn1437SJ9DeKXNy4qZ8KoxIMQ9dsfBMCh+jKX9k5w==
+
 next@latest:
   version "11.1.2"
   resolved "https://registry.yarnpkg.com/next/-/next-11.1.2.tgz#527475787a9a362f1bc916962b0c0655cc05bc91"
