@@ -36,7 +36,7 @@ return router.builder();
 
 ### Requirements
 
-Currently only tested with `node.js v12+` with `next.js v10+`
+Currently only tested with `node.js v14+` with `next.js v10+`
 
 > Feel free to submit if you have issues regard to runtime environments
 
