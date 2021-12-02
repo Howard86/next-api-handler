@@ -1,5 +1,6 @@
 # next-api-handler
 
+[![install size](https://packagephobia.com/badge?p=next-api-handler)](https://packagephobia.com/result?p=next-api-handler)
 [![CircleCI](https://circleci.com/gh/Howard86/next-api-handler/tree/main.svg?style=svg)](https://circleci.com/gh/Howard86/next-api-handler/tree/main)
 [![codecov](https://codecov.io/gh/Howard86/next-api-handler/branch/main/graph/badge.svg?token=EIH9QQTLXT)](https://codecov.io/gh/Howard86/next-api-handler)
 [![next-api-handler](https://img.shields.io/endpoint?url=https://dashboard.cypress.io/badge/detailed/d5185e/main&style=flat&logo=cypress)](https://dashboard.cypress.io/projects/d5185e/runs)
