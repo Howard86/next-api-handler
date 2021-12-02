@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.1.0](https://github.com/Howard86/next-api-handler/compare/v0.0.7...v0.1.0) (2021-12-02)
+
+### Features
+
+* **ci:** add codecov to circleci ([fdf5c80](https://github.com/Howard86/next-api-handler/commit/fdf5c80a6389f062af3287e7adcfd1b8f731d6f1))
+
 ### [0.0.7](https://github.com/Howard86/next-api-handler/compare/v0.0.6...v0.0.7) (2021-11-05)
 
 
