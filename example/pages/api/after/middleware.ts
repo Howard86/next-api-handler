@@ -20,7 +20,7 @@ type DataResponse = {
 // here we have the same type as response
 type MiddlewareType = DataResponse;
 
-const router = new RouterBuilder();
+const router = new RouterBuilder({ shoeMessage: true });
 
 router.use<Pick<MiddlewareType, 'email'>>((req) => {
   const email = getEmailFromCookie(req.cookies['TEST_COOKIE']);

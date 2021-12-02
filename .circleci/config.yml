@@ -25,6 +25,7 @@ jobs:
           key: v1-deps-{{ .Branch }}-{{ checksum "package.json" }}
           paths:
             - ~/.cache ## cache both yarn and Cypress!
+      - run: yarn build
       - run: yarn e2e:headless
   'node-14':
     docker:
