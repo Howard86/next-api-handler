@@ -1947,10 +1947,10 @@ nanoid@^3.1.23:
   resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.1.25.tgz#09ca32747c0e543f0e1814b7d3793477f9c8e152"
   integrity sha512-rdwtIXaXCLFAQbnfqDRnI6jaRHp9fTcYBjtFKE8eezcZ7LuLjhUaQGNeMXf1HmRoCH32CLz6XwX0TtxEOS/A3Q==
 
-next-api-handler@^0.0.6:
-  version "0.0.6"
-  resolved "https://registry.yarnpkg.com/next-api-handler/-/next-api-handler-0.0.6.tgz#f239967701e7c521bb5f74a5140d6feb06e15904"
-  integrity sha512-LwYfIe12jEWuWQbiBMprgcw6mWoyV92+dsvhqGkxLWo7ADn1437SJ9DeKXNy4qZ8KoxIMQ9dsfBMCh+jKX9k5w==
+next-api-handler@^0.0.7:
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/next-api-handler/-/next-api-handler-0.0.7.tgz#52b6828ab9e26dd8c5c380cacd7ba946cfcc1e5e"
+  integrity sha512-44rexxutC9QbcUYqnKjchAx8qnxOvQXHSg46miFm9DJ/u1/k0Jsdjhk5lBNwAz7oWrxrCmyKkcLc1BFE28rP+g==
 
 next@12.0.2:
   version "12.0.2"
