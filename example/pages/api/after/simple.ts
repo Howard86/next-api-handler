@@ -2,7 +2,7 @@ import { BadRequestException, RouterBuilder } from 'next-api-handler';
 
 import { getDataById } from '@/server/service';
 
-const router = new RouterBuilder();
+const router = new RouterBuilder({ shoeMessage: true });
 
 router.get<string>((req) => {
   const { id } = req.query;

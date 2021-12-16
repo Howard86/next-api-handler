@@ -25,7 +25,12 @@ jobs:
           key: v1-deps-{{ .Branch }}-{{ checksum "package.json" }}
           paths:
             - ~/.cache ## cache both yarn and Cypress!
-      - run: yarn e2e:headless
+      - run:
+          name: Build production bundle
+          command: yarn build
+      - run:
+          name: Run end-to-end test in headless mode
+          command: yarn start-server-and-test 'yarn start' http://localhost:3000 'yarn cypress:headless --record --key $CYPRESS_RECORD_KEY'
   'node-14':
     docker:
       - image: circleci/node:14
