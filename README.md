@@ -229,6 +229,45 @@ const fetchLocalUser = async (args): Promise<User> => {
 };
 ```
 
+## Compatibility
+
+As `next-api-handler` provides a general interface to generate `next.js` handler, it will be easy to work with other libraries like following:
+
+```ts
+import { RouterBuilder } from 'next-api-handler'
+
+const router = new RouterBuilder()
+
+router.get( ... )
+router.post( ... )
+
+// here handler has type 'NextApiHandler' exposed from 'next'
+const handler = router.build()
+
+// ... work with wrapper or other plugins
+```
+
+A quick example with [iron-session](https://github.com/vvo/iron-session):
+
+```ts
+// pages/api/user.ts
+
+import { withIronSessionApiRoute } from 'iron-session/next';
+import { RouterBuilder } from 'next-api-handler';
+
+const router = new RouterBuilder();
+const handler = router.get((req) => req.session.user).build();
+
+export default withIronSessionApiRoute(handler, {
+  cookieName: 'myapp_cookiename',
+  password: 'complex_password_at_least_32_characters_long',
+  // secure: true should be used in production (HTTPS) but can't be used in development (HTTP)
+  cookieOptions: {
+    secure: process.env.NODE_ENV === 'production',
+  },
+});
+```
+
 ## Reference
 
 - Full API: please refer to [Github Page](https://howard86.github.io/next-api-handler/)
