@@ -53,28 +53,28 @@ export type RouterOptions = Partial<{
 }>;
 
 /**
- * A router builder is next api handler builder that expose express-like api.
+ * A router builder is next api handler builder that exposes express-like api.
  *
  * ### Example (basic usage)
  * ```js
  * // In next.js /pages/api/[route]
  * import { RouterBuilder } from 'next-api-handler'
- * const handler = new RouterBuilder().build()
- * export default handler
+ * const router = new RouterBuilder().build()
+ * export default router
  * ```
  *
  * ### Example (add RESTful method)
  * ```js
  * import { RouterBuilder } from 'next-api-handler'
- * const handler = new RouterBuilder().get((req, res) => "RESPONSE")
- * export default handler
+ * const router = new RouterBuilder().get((req, res) => "RESPONSE")
+ * export default router
  * ```
  *
  * ### Example (add async method)
  * ```js
  * import { RouterBuilder } from 'next-api-handler'
  * const handler = new RouterBuilder().get(async (req, res) => "ASYNC RESPONSE")
- * export default handler
+ * export default router
  * ```
  *
  * @returns a builder that can build a next.js api handler.

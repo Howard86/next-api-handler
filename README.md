@@ -4,6 +4,7 @@
 [![CircleCI](https://circleci.com/gh/Howard86/next-api-handler/tree/main.svg?style=svg)](https://circleci.com/gh/Howard86/next-api-handler/tree/main)
 [![codecov](https://codecov.io/gh/Howard86/next-api-handler/branch/main/graph/badge.svg?token=EIH9QQTLXT)](https://codecov.io/gh/Howard86/next-api-handler)
 [![next-api-handler](https://img.shields.io/endpoint?url=https://dashboard.cypress.io/badge/detailed/d5185e/main&style=flat&logo=cypress)](https://dashboard.cypress.io/projects/d5185e/runs)
+![Known Vulnerabilities](https://snyk.io/test/github/howard86/next-api-handler/badge.svg)
 
 lightweight next.js api handler wrapper, portable & configurable for serverless environment
 
@@ -13,7 +14,7 @@ lightweight next.js api handler wrapper, portable & configurable for serverless 
 
 [next-api-handler](https://www.npmjs.com/package/next-api-handler) will help in the following 3 aspects
 
-- sharable & express-like methods with middleware to build RESTful api route
+- sharable & express-like apis with middleware to build RESTful api route
 - simple response handler to transform response and error/exception in a predictable way
 - friendly generic types to build type-safe API interface shared between client & server
 
@@ -32,7 +33,7 @@ const router = new RouterBuilder();
 router.post(async (req) => createUser(req.query.id));
 router.get<{ name: string }>(() => ({ name: 'John Doe' }));
 
-return router.builder();
+return router.build();
 ```
 
 ### Requirements
@@ -70,7 +71,7 @@ router.get(() => ({ name: 'John Doe' }));
 //   return user;
 // });
 
-return router.builder();
+return router.build();
 ```
 
 Which is equivalent to the following next.js [API routes](https://nextjs.org/docs/api-routes/introduction)
@@ -165,16 +166,19 @@ then we can reuse this `user` value in all other routes white enforcing type-che
 ```ts
 import { RouterBuilder, NextApiRequestWithMiddleware } from 'next-api-handler';
 
-type User = {}; // some type returned from getUserInfo
+// some type returned from getUserInfo
+type User = {
+  id: string;
+};
 
 const router = new RouterBuilder();
 
 // or router.inject(authMiddleware) if the order of adding middleware does not matter
 router.use<User>(authMiddleware);
 
-// all middleware values will stay in `req.middleware`
-router.get<User>(
-  (req: NextApiRequestWithMiddleware<User>) => req.middleware.user
+// all middleware values will stay in `req.middleware`,
+router.get<string, User>(
+  (req: NextApiRequestWithMiddleware<User>) => req.middleware.user.id
 );
 
 return router.build();
@@ -202,9 +206,9 @@ We can share the response type for client side to reuse, e.g. here as axios
 import axios from 'axios';
 import type { SuccessApiResponse } from 'next-api-handler';
 
-const result = await axios.get<SuccessApiResponse<{ name: string }>>(
-  '/api/...'
-);
+type User = { name: string };
+
+const result = await axios.get<SuccessApiResponse<User>>('/api/...');
 ```
 
 or with native `fetch` provided by next.js, it is easy to determine whether it is a successful api response
@@ -216,7 +220,7 @@ const fetchLocalUser = async (args): Promise<User> => {
   const response = await fetch('/api/...', args);
   const result = (await response.json()) as ApiResponse<User>;
 
-  if (!result.success) {
+  if (!result?.success) {
     throw new Error(result.message);
   }
 
@@ -224,6 +228,16 @@ const fetchLocalUser = async (args): Promise<User> => {
   return result.data;
 };
 ```
+
+## Reference
+
+- Full API: please refer to [Github Page](https://howard86.github.io/next-api-handler/)
+- Tests:
+  - [unit tests](https://app.circleci.com/pipelines/github/Howard86/next-api-handler?branch=main) powered by [CircleCI](https://circleci.com)
+  - [coverage](https://codecov.io/gh/Howard86/next-api-handler) check powered by [codecov](https://app.codecov.io)
+  - [end-to-end tests](https://dashboard.cypress.io/projects/d5185e/runs) powered by [Cypress](https://www.cypress.io)
+  - vulnerability check by [Snyk](https://snyk.io)
+- Deployment: A [demo](https://next-api-handler.vercel.app) website deployed on [Vercel](https://vercel.com) with documentation site powered by [Github Page](https://pages.github.com)
 
 ## License
 
