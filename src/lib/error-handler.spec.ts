@@ -1,13 +1,12 @@
 import test from 'ava';
-import type { NextApiResponse } from 'next';
+import type { NextApiRequest, NextApiResponse } from 'next';
 import sinon, { SinonSpy } from 'sinon';
 
 import { makeErrorHandler } from './error-handler';
 import { HttpException } from './http-exceptions';
 import { ErrorApiResponse } from './router';
-import { NextApiRequestWithMiddleware } from './router';
 
-const req = {} as unknown as NextApiRequestWithMiddleware;
+const req = {} as unknown as NextApiRequest;
 const res = {
   status(_statusCode: number) {
     return this;

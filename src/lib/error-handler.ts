@@ -1,10 +1,10 @@
-import type { NextApiResponse } from 'next';
+import type { NextApiRequest, NextApiResponse } from 'next';
 
 import { HttpException } from './http-exceptions';
-import type { ErrorApiResponse, NextApiRequestWithMiddleware } from './router';
+import type { ErrorApiResponse } from './router';
 
 export type ApiErrorHandler = (
-  req: NextApiRequestWithMiddleware,
+  req: NextApiRequest,
   res: NextApiResponse<ErrorApiResponse>,
   error: Error
 ) => void;

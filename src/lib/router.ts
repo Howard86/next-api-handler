@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import type { NextApiHandler, NextApiRequest, NextApiResponse } from 'next';
 
 import { ApiErrorHandler, makeErrorHandler } from './error-handler';
 import { MethodNotAllowedException } from './http-exceptions';
@@ -9,49 +9,13 @@ import { MethodNotAllowedException } from './http-exceptions';
 export type TypedObject<T = unknown> = Record<string, T>;
 
 /**
- *  a sync/async function that takes next.js request and optional next.js response
- */
-export type NextApiHandler<T = unknown, M extends TypedObject = TypedObject> = (
-  req: NextApiRequestWithMiddleware<M>,
-  res?: NextApiResponse
-) => T | Promise<T>;
-
-/**
- *  a next.js api request with pre-defined query for usage of req.query
- */
-export interface NextApiRequestWithQuery<
-  T extends TypedObject<string | string[]>
-> extends NextApiRequest {
-  query: T;
-}
-
-/**
- *  a next.js api request with pre-defined body for usage of req.body
- */
-export interface NextApiRequestWithBody<T extends TypedObject>
-  extends NextApiRequest {
-  body: T;
-}
-
-/**
- *  a next.js api request with injected req.middleware
- */
-export interface NextApiRequestWithMiddleware<T = TypedObject>
-  extends NextApiRequest {
-  middleware: T;
-}
-
-/**
  *  a standard next.js api handler but with req.middleware available
  *  see [official doc](https://nextjs.org/docs/api-routes/introduction) for more details
  */
 export type NextApiHandlerWithMiddleware<
   T = unknown,
   M extends TypedObject = TypedObject
-> = (
-  req: NextApiRequestWithMiddleware<M>,
-  res: NextApiResponse<T>
-) => void | Promise<void>;
+> = (req: NextApiRequest<M>, res: NextApiResponse) => T | Promise<T>;
 
 /**
  *  all api response combines success response & error response
@@ -104,10 +68,21 @@ export type RouterOptions = Partial<{
  * @returns a builder that can build a next.js api handler.
  */
 export class RouterBuilder {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private readonly route: Record<string, NextApiHandler<unknown, any>> = {};
-  private readonly middlewareList: NextApiHandler<TypedObject>[] = [];
-  private readonly middlewareQueue: NextApiHandler<TypedObject>[] = [];
+  private readonly route: Record<
+    string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    NextApiHandlerWithMiddleware<unknown, any>
+  > = {};
+  private readonly middlewareList: NextApiHandlerWithMiddleware<
+    TypedObject,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    any
+  >[] = [];
+  private readonly middlewareQueue: NextApiHandlerWithMiddleware<
+    TypedObject,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    any
+  >[] = [];
   private readonly routerOptions = {} as Required<RouterOptions>;
 
   constructor(options: RouterOptions = {}) {
@@ -120,79 +95,76 @@ export class RouterBuilder {
       );
   }
 
-  get<T = unknown, M extends TypedObject = TypedObject>(
-    handler: NextApiHandler<T, M>
+  get<T, M extends TypedObject = TypedObject>(
+    handler: NextApiHandlerWithMiddleware<T, M>
   ): RouterBuilder {
     return this.add('GET', handler);
   }
 
-  head<T = unknown, M extends TypedObject = TypedObject>(
-    handler: NextApiHandler<T, M>
+  head<T, M extends TypedObject = TypedObject>(
+    handler: NextApiHandlerWithMiddleware<T, M>
   ): RouterBuilder {
     return this.add('HEAD', handler);
   }
 
-  patch<T = unknown, M extends TypedObject = TypedObject>(
-    handler: NextApiHandler<T, M>
+  patch<T, M extends TypedObject = TypedObject>(
+    handler: NextApiHandlerWithMiddleware<T, M>
   ): RouterBuilder {
     return this.add('PATCH', handler);
   }
 
-  options<T = unknown, M extends TypedObject = TypedObject>(
-    handler: NextApiHandler<T, M>
+  options<T, M extends TypedObject = TypedObject>(
+    handler: NextApiHandlerWithMiddleware<T, M>
   ): RouterBuilder {
     return this.add('OPTIONS', handler);
   }
 
-  connect<T = unknown, M extends TypedObject = TypedObject>(
-    handler: NextApiHandler<T, M>
+  connect<T, M extends TypedObject = TypedObject>(
+    handler: NextApiHandlerWithMiddleware<T, M>
   ): RouterBuilder {
     return this.add('CONNECT', handler);
   }
 
-  delete<T = unknown, M extends TypedObject = TypedObject>(
-    handler: NextApiHandler<T, M>
+  delete<T, M extends TypedObject = TypedObject>(
+    handler: NextApiHandlerWithMiddleware<T, M>
   ): RouterBuilder {
     return this.add('DELETE', handler);
   }
 
-  trace<T = unknown, M extends TypedObject = TypedObject>(
-    handler: NextApiHandler<T, M>
+  trace<T, M extends TypedObject = TypedObject>(
+    handler: NextApiHandlerWithMiddleware<T, M>
   ): RouterBuilder {
     return this.add('TRACE', handler);
   }
 
-  post<T = unknown, M extends TypedObject = TypedObject>(
-    handler: NextApiHandler<T, M>
+  post<T, M extends TypedObject = TypedObject>(
+    handler: NextApiHandlerWithMiddleware<T, M>
   ): RouterBuilder {
     return this.add('POST', handler);
   }
 
-  put<T = unknown, M extends TypedObject = TypedObject>(
-    handler: NextApiHandler<T, M>
+  put<T, M extends TypedObject = TypedObject>(
+    handler: NextApiHandlerWithMiddleware<T, M>
   ): RouterBuilder {
     return this.add('PUT', handler);
   }
 
-  use<T extends TypedObject = TypedObject>(
-    handler: NextApiHandler<T>
+  use<T extends TypedObject, M extends TypedObject = TypedObject>(
+    handler: NextApiHandlerWithMiddleware<T, M>
   ): RouterBuilder {
     this.middlewareQueue.push(handler);
     return this;
   }
 
-  inject<T extends TypedObject = TypedObject>(
-    handler: NextApiHandler<T>
+  inject<T extends TypedObject, M extends TypedObject = TypedObject>(
+    handler: NextApiHandlerWithMiddleware<T, M>
   ): RouterBuilder {
     this.middlewareList.push(handler);
     return this;
   }
 
-  build(): NextApiHandlerWithMiddleware {
-    return async (
-      req: NextApiRequestWithMiddleware,
-      res: NextApiResponse<ApiResponse>
-    ) => {
+  build(): NextApiHandler {
+    return async (req: NextApiRequest, res: NextApiResponse<ApiResponse>) => {
       try {
         const handler = this.route[req.method || 'GET'];
 
@@ -225,7 +197,7 @@ export class RouterBuilder {
   }
 
   private async handleMiddlewareQueue(
-    req: NextApiRequestWithMiddleware,
+    req: NextApiRequest,
     res: NextApiResponse<ApiResponse>
   ): Promise<void> {
     for (const middleware of this.middlewareQueue) {
@@ -238,7 +210,7 @@ export class RouterBuilder {
   }
 
   private async handleMiddlewareList(
-    req: NextApiRequestWithMiddleware,
+    req: NextApiRequest,
     res: NextApiResponse<ApiResponse>
   ): Promise<void> {
     await Promise.all(
@@ -252,9 +224,9 @@ export class RouterBuilder {
     );
   }
 
-  private add<T = unknown, M extends TypedObject = TypedObject>(
+  private add<T, M extends TypedObject>(
     method: string,
-    handler: NextApiHandler<T, M>
+    handler: NextApiHandlerWithMiddleware<T, M>
   ): RouterBuilder {
     this.route[method] = handler;
     return this;
