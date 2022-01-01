@@ -1,13 +1,8 @@
 import test from 'ava';
-import type { NextApiResponse } from 'next';
+import type { NextApiRequest, NextApiResponse } from 'next';
 import sinon, { SinonSpy } from 'sinon';
 
-import {
-  ErrorApiResponse,
-  NextApiRequestWithMiddleware,
-  RouterBuilder,
-  SuccessApiResponse,
-} from './router';
+import { ErrorApiResponse, RouterBuilder, SuccessApiResponse } from './router';
 
 const ROUTING_METHODS = [
   'get',
@@ -57,7 +52,7 @@ test.serial('should accept showError options when its true', async (t) => {
   });
 
   const handler = router.build();
-  await handler({} as NextApiRequestWithMiddleware, res);
+  await handler({} as NextApiRequest, res);
   t.true(spiedStatus.calledWith(500));
   t.true(
     spiedJson.calledWith({
@@ -75,7 +70,7 @@ test.serial('should accept showError options when its false', async (t) => {
   });
 
   const handler = router.build();
-  await handler({} as NextApiRequestWithMiddleware, res);
+  await handler({} as NextApiRequest, res);
   t.true(spiedStatus.calledWith(500));
   t.true(
     spiedJson.calledWith({
@@ -92,7 +87,7 @@ test.serial('should return 405 for all empty routes', async (t) => {
   await Promise.all(
     ROUTING_METHODS.map((method) => method.toUpperCase()).map(
       async (method) => {
-        await handler({ method } as NextApiRequestWithMiddleware, res);
+        await handler({ method } as NextApiRequest, res);
         t.true(spiedSetHeader.calledWith('Allow', []));
         t.true(spiedStatus.calledWith(405));
         t.true(
@@ -114,10 +109,7 @@ test.serial(
         const TEXT = `${method.toUpperCase()}_API_RESPONSE`;
         router[method]((_req) => TEXT);
         const handler = router.build();
-        await handler(
-          { method: method.toUpperCase() } as NextApiRequestWithMiddleware,
-          res
-        );
+        await handler({ method: method.toUpperCase() } as NextApiRequest, res);
         t.true(spiedStatus.calledWith(200));
         t.true(
           spiedJson.calledWith({
@@ -138,10 +130,7 @@ test.serial('should handle errors', async (t) => {
         throw error;
       });
       const handler = router.build();
-      await handler(
-        { method: method.toUpperCase() } as NextApiRequestWithMiddleware,
-        res
-      );
+      await handler({ method: method.toUpperCase() } as NextApiRequest, res);
       t.true(spiedStatus.calledWith(500));
       t.true(
         spiedJson.calledWith({
@@ -159,10 +148,7 @@ test.serial('should handle asynchronous request', async (t) => {
       const TEXT = `${method.toUpperCase()}_API_RESPONSE`;
       router[method]((_req) => Promise.resolve(TEXT));
       const handler = router.build();
-      await handler(
-        { method: method.toUpperCase() } as NextApiRequestWithMiddleware,
-        res
-      );
+      await handler({ method: method.toUpperCase() } as NextApiRequest, res);
       t.true(spiedStatus.calledWith(200));
       t.true(
         spiedJson.calledWith({
@@ -182,10 +168,7 @@ test.serial(
         const error = new Error(`${method.toUpperCase()}_API_ERROR`);
         router[method]((_req) => Promise.reject(error));
         const handler = router.build();
-        await handler(
-          { method: method.toUpperCase() } as NextApiRequestWithMiddleware,
-          res
-        );
+        await handler({ method: method.toUpperCase() } as NextApiRequest, res);
         t.true(spiedStatus.calledWith(500));
         t.true(
           spiedJson.calledWith({
@@ -216,14 +199,12 @@ test.serial(
     router.get((req) => req.middleware);
     const handler = router.build();
 
-    const cookieMiddleware = (
-      _req: NextApiRequestWithMiddleware
-    ): FakeCookie => ({
+    const cookieMiddleware = (_req: NextApiRequest): FakeCookie => ({
       testCookie: 'TEST_COOKIE',
     });
     router.use<FakeCookie>(cookieMiddleware);
 
-    await handler({ method: 'GET' } as NextApiRequestWithMiddleware, res);
+    await handler({ method: 'GET' } as NextApiRequest, res);
     t.true(spiedStatus.calledWith(200));
     t.true(
       spiedJson.calledWith({
@@ -234,7 +215,7 @@ test.serial(
       })
     );
 
-    const userMiddleware = (req: NextApiRequestWithMiddleware): FakeUser => ({
+    const userMiddleware = (req: NextApiRequest): FakeUser => ({
       user: {
         id: '1',
         name: 'TEST_USER',
@@ -244,7 +225,7 @@ test.serial(
 
     router.use<FakeUser>(userMiddleware);
 
-    await handler({ method: 'GET' } as NextApiRequestWithMiddleware, res);
+    await handler({ method: 'GET' } as NextApiRequest, res);
 
     t.true(spiedStatus.calledWith(200));
     t.true(
@@ -269,13 +250,11 @@ test.serial(
     router.get((req) => req.middleware);
     const handler = router.build();
 
-    const cookieMiddleware = (
-      _req: NextApiRequestWithMiddleware
-    ): FakeCookie => ({
+    const cookieMiddleware = (_req: NextApiRequest): FakeCookie => ({
       testCookie: 'TEST_COOKIE',
     });
 
-    const userMiddleware = (_req: NextApiRequestWithMiddleware): FakeUser => ({
+    const userMiddleware = (_req: NextApiRequest): FakeUser => ({
       user: {
         id: '1',
         name: 'TEST_USER',
@@ -286,7 +265,7 @@ test.serial(
     router.inject<FakeCookie>(cookieMiddleware);
     router.inject<FakeUser>(userMiddleware);
 
-    await handler({ method: 'GET' } as NextApiRequestWithMiddleware, res);
+    await handler({ method: 'GET' } as NextApiRequest, res);
 
     t.true(spiedStatus.calledWith(200));
     t.true(
@@ -311,13 +290,11 @@ test.serial(
     router.get((req) => req.middleware);
     const handler = router.build();
 
-    const cookieMiddleware = (
-      _req: NextApiRequestWithMiddleware
-    ): FakeCookie => ({
+    const cookieMiddleware = (_req: NextApiRequest): FakeCookie => ({
       testCookie: 'TEST_COOKIE',
     });
 
-    const userMiddleware = (req: NextApiRequestWithMiddleware): FakeUser => ({
+    const userMiddleware = (req: NextApiRequest): FakeUser => ({
       user: {
         id: '1',
         name: 'TEST_USER',
@@ -328,7 +305,7 @@ test.serial(
     router.inject<FakeCookie>(cookieMiddleware);
     router.use<FakeUser>(userMiddleware);
 
-    await handler({ method: 'GET' } as NextApiRequestWithMiddleware, res);
+    await handler({ method: 'GET' } as NextApiRequest, res);
 
     t.true(spiedStatus.calledWith(200));
     t.true(

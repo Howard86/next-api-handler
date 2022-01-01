@@ -1,6 +1,6 @@
 {
   "name": "next-api-handler",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "lightweight nextjs api handler wrapper, portable & configurable for serverless environment",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",
@@ -36,7 +36,7 @@
     "doc:publish": "gh-pages -m \"[ci skip] Updates\" -d build/docs",
     "release": "standard-version",
     "reset-hard": "git clean -dfx && git reset --hard && yarn",
-    "prepare-release": "run-s reset-hard test cov:check doc:html release doc:publish"
+    "prepare-release": "run-s reset-hard test cov:check doc:html doc:publish"
   },
   "engines": {
     "node": ">=14"
