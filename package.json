@@ -7,7 +7,14 @@
   "module": "build/module/index.js",
   "repository": "https://github.com/Howard86/next-api-handler",
   "license": "MIT",
-  "keywords": ["next", "api", "restful", "middleware", "express", "serverless"],
+  "keywords": [
+    "next",
+    "api",
+    "restful",
+    "middleware",
+    "express",
+    "serverless"
+  ],
   "scripts": {
     "build": "run-p build:*",
     "build:main": "tsc -p tsconfig.json",
