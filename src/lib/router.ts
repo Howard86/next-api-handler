@@ -15,7 +15,19 @@ export type TypedObject<T = unknown> = Record<string, T>;
 export type NextApiHandlerWithMiddleware<
   T = unknown,
   M extends TypedObject = TypedObject
-> = (req: NextApiRequest<M>, res: NextApiResponse) => T | Promise<T>;
+> = (
+  req: NextApiRequestWithMiddleware<M>,
+  res: NextApiResponse
+) => T | Promise<T>;
+
+/**
+ *  a standard next.js api request but with req.middleware available
+ */
+export interface NextApiRequestWithMiddleware<
+  M extends TypedObject = TypedObject
+> extends NextApiRequest {
+  middleware: M;
+}
 
 /**
  *  all api response combines success response & error response
@@ -149,16 +161,17 @@ export class RouterBuilder {
     return this.add('PUT', handler);
   }
 
-  use<T extends TypedObject, M extends TypedObject = TypedObject>(
+  use<T extends TypedObject = TypedObject, M extends TypedObject = TypedObject>(
     handler: NextApiHandlerWithMiddleware<T, M>
   ): RouterBuilder {
     this.middlewareQueue.push(handler);
     return this;
   }
 
-  inject<T extends TypedObject, M extends TypedObject = TypedObject>(
-    handler: NextApiHandlerWithMiddleware<T, M>
-  ): RouterBuilder {
+  inject<
+    T extends TypedObject = TypedObject,
+    M extends TypedObject = TypedObject
+  >(handler: NextApiHandlerWithMiddleware<T, M>): RouterBuilder {
     this.middlewareList.push(handler);
     return this;
   }
@@ -175,17 +188,25 @@ export class RouterBuilder {
           );
         }
 
-        req.middleware = {};
+        (req as NextApiRequestWithMiddleware).middleware = {};
 
         if (this.middlewareList.length > 0) {
-          await this.handleMiddlewareList(req, res);
+          await this.handleMiddlewareList(
+            req as NextApiRequestWithMiddleware,
+            res
+          );
         }
 
         if (this.middlewareQueue.length > 0) {
-          await this.handleMiddlewareQueue(req, res);
+          await this.handleMiddlewareQueue(
+            req as NextApiRequestWithMiddleware,
+            res
+          );
         }
 
-        const data = await Promise.resolve(handler(req, res));
+        const data = await Promise.resolve(
+          handler(req as NextApiRequestWithMiddleware, res)
+        );
         return res.status(200).json({
           success: true,
           data,
@@ -197,7 +218,7 @@ export class RouterBuilder {
   }
 
   private async handleMiddlewareQueue(
-    req: NextApiRequest,
+    req: NextApiRequestWithMiddleware,
     res: NextApiResponse<ApiResponse>
   ): Promise<void> {
     for (const middleware of this.middlewareQueue) {
@@ -210,7 +231,7 @@ export class RouterBuilder {
   }
 
   private async handleMiddlewareList(
-    req: NextApiRequest,
+    req: NextApiRequestWithMiddleware,
     res: NextApiResponse<ApiResponse>
   ): Promise<void> {
     await Promise.all(
