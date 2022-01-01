@@ -176,7 +176,9 @@ export class RouterBuilder {
     return this;
   }
 
-  build(): NextApiHandler {
+  build<M>(): M extends TypedObject
+    ? NextApiHandlerWithMiddleware<unknown, M>
+    : NextApiHandler {
     return async (req: NextApiRequest, res: NextApiResponse<ApiResponse>) => {
       try {
         const handler = this.route[req.method || 'GET'];
