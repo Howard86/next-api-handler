@@ -26,8 +26,6 @@ export default function userHandler(
     method,
   } = req;
 
-  console.log(`req.query`, req.query);
-
   switch (method) {
     case 'GET':
       // Get data from your database
