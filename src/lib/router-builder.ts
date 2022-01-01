@@ -47,7 +47,7 @@ export type ErrorApiResponse = { success: false; message: string };
 /**
  * RouterBuilder options
  */
-export type RouterOptions = Partial<{
+export type RouterBuilderOptions = Partial<{
   error: ApiErrorHandler;
   shoeMessage: boolean;
 }>;
@@ -95,9 +95,9 @@ export class RouterBuilder {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     any
   >[] = [];
-  private readonly routerOptions = {} as Required<RouterOptions>;
+  private readonly routerOptions = {} as Required<RouterBuilderOptions>;
 
-  constructor(options: RouterOptions = {}) {
+  constructor(options: RouterBuilderOptions = {}) {
     this.routerOptions.error =
       options.error ||
       makeErrorHandler(
