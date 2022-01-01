@@ -1,2 +1,2 @@
-export * from './lib/router';
+export * from './lib/router-builder';
 export * from './lib/http-exceptions';

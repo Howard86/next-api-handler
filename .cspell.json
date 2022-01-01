@@ -3,12 +3,13 @@
   "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/master/cspell.schema.json",
   "language": "en",
   "words": [
-    "bitjson",
     "bitauth",
+    "bitjson",
     "cimg",
     "circleci",
     "codecov",
     "commitlint",
+    "cookiename",
     "dependabot",
     "editorconfig",
     "esnext",
@@ -17,11 +18,14 @@
     "globby",
     "libauth",
     "mkdir",
+    "myapp",
     "prettierignore",
     "sandboxed",
+    "Snyk",
     "transpiled",
     "typedoc",
-    "untracked"
+    "untracked",
+    "Vercel"
   ],
   "flagWords": [],
   "ignorePaths": [

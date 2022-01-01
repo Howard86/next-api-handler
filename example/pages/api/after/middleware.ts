@@ -1,5 +1,4 @@
 import {
-  NextApiRequestWithMiddleware,
   NotFoundException,
   RouterBuilder,
   UnauthorizedException,
@@ -11,18 +10,27 @@ import {
   updateData,
 } from '@/server/service';
 
-type DataResponse = {
+type CookieMiddlewareResponse = {
   email: string;
+};
+
+type UserMiddlewareResponse = {
   id: string;
   name: string;
 };
 
-// here we have the same type as response
-type MiddlewareType = DataResponse;
+type CombinedMiddlewareResponse = CookieMiddlewareResponse &
+  UserMiddlewareResponse;
 
 const router = new RouterBuilder({ shoeMessage: true });
 
-router.use<Pick<MiddlewareType, 'email'>>((req) => {
+/**
+ *  here router.use<T, M> where 
+ *  - T: the response type that a middleware emits
+ *  - M: the middleware type previously injected and used (optional)
+ */
+// router.user<T,M> where
+router.use<CookieMiddlewareResponse>((req) => {
   const email = getEmailFromCookie(req.cookies['TEST_COOKIE']);
 
   if (!email) {
@@ -32,24 +40,26 @@ router.use<Pick<MiddlewareType, 'email'>>((req) => {
   return { email };
 });
 
-router.use<Omit<MiddlewareType, 'email'>>(
-  async (req: NextApiRequestWithMiddleware<Pick<MiddlewareType, 'email'>>) => {
-    const data = await getDataByEmail(req.middleware.email);
+router.use<UserMiddlewareResponse, CookieMiddlewareResponse>(async (req) => {
+  const data = await getDataByEmail(req.middleware.email);
 
-    if (!data) {
-      throw new NotFoundException();
-    }
-
-    return data;
+  if (!data) {
+    throw new NotFoundException();
   }
+
+  return data;
+});
+
+router.get<CombinedMiddlewareResponse, CombinedMiddlewareResponse>(
+  (req) => req.middleware
 );
 
-router.get<DataResponse, MiddlewareType>((req) => req.middleware);
-
-router.put<DataResponse, MiddlewareType>(async (req) => {
-  const name = req.body?.name as string;
-  await updateData(req.middleware.email, name);
-  return { ...req.middleware, name };
-});
+router.put<CombinedMiddlewareResponse, CombinedMiddlewareResponse>(
+  async (req) => {
+    const name = req.body?.name as string;
+    await updateData(req.middleware.email, name);
+    return { ...req.middleware, name };
+  }
+);
 
 export default router.build();

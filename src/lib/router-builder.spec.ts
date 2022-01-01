@@ -7,7 +7,7 @@ import {
   NextApiRequestWithMiddleware,
   RouterBuilder,
   SuccessApiResponse,
-} from './router';
+} from './router-builder';
 
 const ROUTING_METHODS = [
   'get',

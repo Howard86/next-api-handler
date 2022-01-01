@@ -1,13 +1,20 @@
 {
   "name": "next-api-handler",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "lightweight nextjs api handler wrapper, portable & configurable for serverless environment",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",
   "module": "build/module/index.js",
   "repository": "https://github.com/Howard86/next-api-handler",
   "license": "MIT",
-  "keywords": [],
+  "keywords": [
+    "next",
+    "api",
+    "restful",
+    "middleware",
+    "express",
+    "serverless"
+  ],
   "scripts": {
     "build": "run-p build:*",
     "build:main": "tsc -p tsconfig.json",

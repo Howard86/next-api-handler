@@ -47,34 +47,34 @@ export type ErrorApiResponse = { success: false; message: string };
 /**
  * RouterBuilder options
  */
-export type RouterOptions = Partial<{
+export type RouterBuilderOptions = Partial<{
   error: ApiErrorHandler;
   shoeMessage: boolean;
 }>;
 
 /**
- * A router builder is next api handler builder that expose express-like api.
+ * A router builder is next api handler builder that exposes express-like api.
  *
  * ### Example (basic usage)
  * ```js
  * // In next.js /pages/api/[route]
  * import { RouterBuilder } from 'next-api-handler'
- * const handler = new RouterBuilder().build()
- * export default handler
+ * const router = new RouterBuilder().build()
+ * export default router
  * ```
  *
  * ### Example (add RESTful method)
  * ```js
  * import { RouterBuilder } from 'next-api-handler'
- * const handler = new RouterBuilder().get((req, res) => "RESPONSE")
- * export default handler
+ * const router = new RouterBuilder().get((req, res) => "RESPONSE")
+ * export default router
  * ```
  *
  * ### Example (add async method)
  * ```js
  * import { RouterBuilder } from 'next-api-handler'
  * const handler = new RouterBuilder().get(async (req, res) => "ASYNC RESPONSE")
- * export default handler
+ * export default router
  * ```
  *
  * @returns a builder that can build a next.js api handler.
@@ -95,9 +95,9 @@ export class RouterBuilder {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     any
   >[] = [];
-  private readonly routerOptions = {} as Required<RouterOptions>;
+  private readonly routerOptions = {} as Required<RouterBuilderOptions>;
 
-  constructor(options: RouterOptions = {}) {
+  constructor(options: RouterBuilderOptions = {}) {
     this.routerOptions.error =
       options.error ||
       makeErrorHandler(
@@ -176,7 +176,9 @@ export class RouterBuilder {
     return this;
   }
 
-  build(): NextApiHandler {
+  build<M>(): M extends TypedObject
+    ? NextApiHandlerWithMiddleware<unknown, M>
+    : NextApiHandler {
     return async (req: NextApiRequest, res: NextApiResponse<ApiResponse>) => {
       try {
         const handler = this.route[req.method || 'GET'];

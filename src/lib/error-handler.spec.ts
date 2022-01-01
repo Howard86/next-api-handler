@@ -4,7 +4,7 @@ import sinon, { SinonSpy } from 'sinon';
 
 import { makeErrorHandler } from './error-handler';
 import { HttpException } from './http-exceptions';
-import { ErrorApiResponse } from './router';
+import { ErrorApiResponse } from './router-builder';
 
 const req = {} as unknown as NextApiRequest;
 const res = {

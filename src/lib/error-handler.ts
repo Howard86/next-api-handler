@@ -1,7 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
 import { HttpException } from './http-exceptions';
-import type { ErrorApiResponse } from './router';
+import type { ErrorApiResponse } from './router-builder';
 
 export type ApiErrorHandler = (
   req: NextApiRequest,
