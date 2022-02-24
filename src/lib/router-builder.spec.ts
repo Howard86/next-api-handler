@@ -31,6 +31,7 @@ const res = {
   json(_data: unknown) {
     return;
   },
+  headerSent: false,
 } as unknown as NextApiResponse;
 
 let spiedJson: SinonSpy<[data: unknown], void>;
@@ -120,6 +121,30 @@ test.serial(
         );
         t.true(spiedStatus.calledWith(200));
         t.true(
+          spiedJson.calledWith({
+            success: true,
+            data: TEXT,
+          } as SuccessApiResponse<string>)
+        );
+      })
+    );
+  }
+);
+
+test.serial(
+  'should not return values when header is already sent',
+  async (t) => {
+    await Promise.all(
+      ROUTING_METHODS.map(async (method) => {
+        const TEXT = `${method.toUpperCase()}_API_RESPONSE`;
+        router[method]((_req) => TEXT);
+        const handler = router.build();
+        await handler(
+          { method: method.toUpperCase() } as NextApiRequestWithMiddleware,
+          { ...res, headersSent: true } as NextApiResponse
+        );
+        t.false(spiedStatus.calledWith(200));
+        t.false(
           spiedJson.calledWith({
             success: true,
             data: TEXT,
