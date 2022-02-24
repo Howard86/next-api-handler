@@ -209,10 +209,13 @@ export class RouterBuilder {
         const data = await Promise.resolve(
           handler(req as NextApiRequestWithMiddleware, res)
         );
-        return res.status(200).json({
-          success: true,
-          data,
-        });
+
+        if (!res.headersSent) {
+          res.status(200).json({
+            success: true,
+            data,
+          });
+        }
       } catch (error) {
         this.routerOptions.error(req, res, error as Error);
       }
