@@ -1,3 +1,12 @@
+## [0.2.4](https://github.com/Howard86/next-api-handler/compare/v0.2.3...v0.2.4) (2022-02-24)
+
+
+### Bug Fixes
+
+* fix typescript issues after depedencies bump ([f0a0c90](https://github.com/Howard86/next-api-handler/commit/f0a0c90c9bd4e8ad6023fe52a24f70a46e36e634))
+
+
+
 ## [0.2.3](https://github.com/Howard86/next-api-handler/compare/v0.2.2...v0.2.3) (2022-02-24)
 
 
@@ -31,11 +40,6 @@
 ### Bug Fixes
 
 * example/package.json & example/yarn.lock to reduce vulnerabilities ([50ea312](https://github.com/Howard86/next-api-handler/commit/50ea31207f997efbba2084d614b3377116978763))
-
-
-### Features
-
-* **ci:** add codecov to circleci ([fdf5c80](https://github.com/Howard86/next-api-handler/commit/fdf5c80a6389f062af3287e7adcfd1b8f731d6f1))
 
 
 ### Performance Improvements
