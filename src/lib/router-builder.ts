@@ -49,7 +49,7 @@ export type ErrorApiResponse = { success: false; message: string };
  */
 export type RouterBuilderOptions = Partial<{
   error: ApiErrorHandler;
-  shoeMessage: boolean;
+  showMessage: boolean;
 }>;
 
 /**
@@ -101,8 +101,8 @@ export class RouterBuilder {
     this.routerOptions.error =
       options.error ||
       makeErrorHandler(
-        typeof options.shoeMessage === 'boolean'
-          ? options.shoeMessage
+        typeof options.showMessage === 'boolean'
+          ? options.showMessage
           : process.env.NODE_ENV !== 'production'
       );
   }

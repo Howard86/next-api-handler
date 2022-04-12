@@ -51,7 +51,7 @@ test.afterEach(() => {
 });
 
 test.serial('should accept showError options when its true', async (t) => {
-  router = new RouterBuilder({ shoeMessage: true });
+  router = new RouterBuilder({ showMessage: true });
 
   router.get(() => {
     throw new Error('TEST_ERROR');
@@ -69,7 +69,7 @@ test.serial('should accept showError options when its true', async (t) => {
 });
 
 test.serial('should accept showError options when its false', async (t) => {
-  router = new RouterBuilder({ shoeMessage: false });
+  router = new RouterBuilder({ showMessage: false });
 
   router.get(() => {
     throw new Error('TEST_ERROR');
