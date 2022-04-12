@@ -22,10 +22,10 @@ type UserMiddlewareResponse = {
 type CombinedMiddlewareResponse = CookieMiddlewareResponse &
   UserMiddlewareResponse;
 
-const router = new RouterBuilder({ shoeMessage: true });
+const router = new RouterBuilder({ showMessage: true });
 
 /**
- *  here router.use<T, M> where 
+ *  here router.use<T, M> where
  *  - T: the response type that a middleware emits
  *  - M: the middleware type previously injected and used (optional)
  */

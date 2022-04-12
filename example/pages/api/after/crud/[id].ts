@@ -12,7 +12,7 @@ type User = {
   name: string;
 };
 
-const router = new RouterBuilder({ shoeMessage: true });
+const router = new RouterBuilder({ showMessage: true });
 
 router.get<User>((req: UserRequest) => ({
   id: req.query.id,
