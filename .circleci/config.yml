@@ -5,7 +5,7 @@ orbs:
 jobs:
   cypress:
     docker:
-      - image: cypress/base:14.16.0
+      - image: cypress/base:14.19.0
         environment:
           ## this enables colors in the output
           TERM: xterm
@@ -33,7 +33,7 @@ jobs:
           command: yarn start-server-and-test 'yarn start' http://localhost:3000 'yarn cypress:headless --record --key $CYPRESS_RECORD_KEY'
   'node-14':
     docker:
-      - image: circleci/node:14
+      - image: cimg/node:14.17
     steps:
       - checkout
       - restore_cache:
@@ -48,9 +48,9 @@ jobs:
       - run: yarn test
       - run: yarn cov:send
       - run: yarn cov:check
-  'node-latest':
+  'node-lts':
     docker:
-      - image: circleci/node:latest
+      - image: cimg/node:lts
     steps:
       - checkout
       - restore_cache:
@@ -71,5 +71,5 @@ workflows:
   build:
     jobs:
       - 'node-14'
-      - 'node-latest'
+      - 'node-lts'
       - 'cypress'
