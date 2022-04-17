@@ -33,7 +33,7 @@ const router = new RouterBuilder();
 router.post(async (req) => createUser(req.query.id));
 router.get<{ name: string }>(() => ({ name: 'John Doe' }));
 
-return router.build();
+export default router.build();
 ```
 
 ### Requirements
@@ -71,7 +71,7 @@ router.get(() => ({ name: 'John Doe' }));
 //   return user;
 // });
 
-return router.build();
+export default router.build();
 ```
 
 Which is equivalent to the following next.js [API routes](https://nextjs.org/docs/api-routes/introduction)
@@ -181,7 +181,7 @@ router.get<string, User>(
   (req: NextApiRequestWithMiddleware<User>) => req.middleware.user.id
 );
 
-return router.build();
+export default router.build();
 ```
 
 ## Utilities
