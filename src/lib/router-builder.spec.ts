@@ -39,15 +39,18 @@ let spiedStatus: SinonSpy<[statusCode: number], NextApiResponse>;
 
 let router: RouterBuilder;
 
-test.beforeEach(() => {
+test.before(() => {
   spiedJson = sinon.spy(res, 'json');
   spiedStatus = sinon.spy(res, 'status');
+});
+
+test.beforeEach(() => {
   router = new RouterBuilder();
 });
 
 test.afterEach(() => {
-  spiedJson.restore();
-  spiedStatus.restore();
+  spiedJson.resetHistory();
+  spiedStatus.resetHistory();
 });
 
 test.serial('should accept showError options when its true', async (t) => {
@@ -59,9 +62,9 @@ test.serial('should accept showError options when its true', async (t) => {
 
   const handler = router.build();
   await handler({} as NextApiRequestWithMiddleware, res);
-  t.true(spiedStatus.calledWith(500));
+  t.true(spiedStatus.calledOnceWithExactly(500));
   t.true(
-    spiedJson.calledWith({
+    spiedJson.calledOnceWithExactly({
       success: false,
       message: 'TEST_ERROR',
     } as ErrorApiResponse)
@@ -77,9 +80,9 @@ test.serial('should accept showError options when its false', async (t) => {
 
   const handler = router.build();
   await handler({} as NextApiRequestWithMiddleware, res);
-  t.true(spiedStatus.calledWith(500));
+  t.true(spiedStatus.calledOnceWithExactly(500));
   t.true(
-    spiedJson.calledWith({
+    spiedJson.calledOnceWithExactly({
       success: false,
       message: 'Internal Server Error',
     } as ErrorApiResponse)
@@ -94,10 +97,10 @@ test.serial('should return 405 for all empty routes', async (t) => {
     ROUTING_METHODS.map((method) => method.toUpperCase()).map(
       async (method) => {
         await handler({ method } as NextApiRequestWithMiddleware, res);
-        t.true(spiedSetHeader.calledWith('Allow', []));
-        t.true(spiedStatus.calledWith(405));
+        t.true(spiedSetHeader.alwaysCalledWithExactly('Allow', []));
+        t.true(spiedStatus.alwaysCalledWithExactly(405));
         t.true(
-          spiedJson.calledWith({
+          spiedJson.calledWithExactly({
             success: false,
             message: `Method ${method} Not Allowed`,
           } as ErrorApiResponse)
@@ -119,9 +122,9 @@ test.serial(
           { method: method.toUpperCase() } as NextApiRequestWithMiddleware,
           res
         );
-        t.true(spiedStatus.calledWith(200));
+        t.true(spiedStatus.alwaysCalledWithExactly(200));
         t.true(
-          spiedJson.calledWith({
+          spiedJson.calledWithExactly({
             success: true,
             data: TEXT,
           } as SuccessApiResponse<string>)
@@ -143,9 +146,9 @@ test.serial(
           { method: method.toUpperCase() } as NextApiRequestWithMiddleware,
           { ...res, headersSent: true } as NextApiResponse
         );
-        t.false(spiedStatus.calledWith(200));
+        t.false(spiedStatus.alwaysCalledWithExactly(200));
         t.false(
-          spiedJson.calledWith({
+          spiedJson.calledWithExactly({
             success: true,
             data: TEXT,
           } as SuccessApiResponse<string>)
@@ -167,9 +170,9 @@ test.serial('should handle errors', async (t) => {
         { method: method.toUpperCase() } as NextApiRequestWithMiddleware,
         res
       );
-      t.true(spiedStatus.calledWith(500));
+      t.true(spiedStatus.alwaysCalledWithExactly(500));
       t.true(
-        spiedJson.calledWith({
+        spiedJson.calledWithExactly({
           success: false,
           message: error.message,
         } as ErrorApiResponse)
@@ -188,9 +191,9 @@ test.serial('should handle asynchronous request', async (t) => {
         { method: method.toUpperCase() } as NextApiRequestWithMiddleware,
         res
       );
-      t.true(spiedStatus.calledWith(200));
+      t.true(spiedStatus.alwaysCalledWithExactly(200));
       t.true(
-        spiedJson.calledWith({
+        spiedJson.calledWithExactly({
           success: true,
           data: TEXT,
         } as SuccessApiResponse<string>)
@@ -211,9 +214,9 @@ test.serial(
           { method: method.toUpperCase() } as NextApiRequestWithMiddleware,
           res
         );
-        t.true(spiedStatus.calledWith(500));
+        t.true(spiedStatus.alwaysCalledWithExactly(500));
         t.true(
-          spiedJson.calledWith({
+          spiedJson.calledWithExactly({
             success: false,
             message: error.message,
           } as ErrorApiResponse)
@@ -249,9 +252,9 @@ test.serial(
     router.use<FakeCookie>(cookieMiddleware);
 
     await handler({ method: 'GET' } as NextApiRequestWithMiddleware, res);
-    t.true(spiedStatus.calledWith(200));
+    t.true(spiedStatus.calledOnceWithExactly(200));
     t.true(
-      spiedJson.calledWith({
+      spiedJson.calledOnceWithExactly({
         success: true,
         data: {
           testCookie: 'TEST_COOKIE',
@@ -259,21 +262,26 @@ test.serial(
       })
     );
 
-    const userMiddleware = (req: NextApiRequestWithMiddleware): FakeUser => ({
+    spiedStatus.resetHistory();
+    spiedJson.resetHistory();
+
+    const userMiddleware = (
+      req: NextApiRequestWithMiddleware<FakeCookie>
+    ): FakeUser => ({
       user: {
         id: '1',
         name: 'TEST_USER',
-        testCookie: req.middleware.testCookie as string,
+        testCookie: req.middleware.testCookie,
       },
     });
 
-    router.use<FakeUser>(userMiddleware);
+    router.use<FakeUser, FakeCookie>(userMiddleware);
 
     await handler({ method: 'GET' } as NextApiRequestWithMiddleware, res);
 
-    t.true(spiedStatus.calledWith(200));
+    t.true(spiedStatus.calledOnceWithExactly(200));
     t.true(
-      spiedJson.calledWith({
+      spiedJson.calledOnceWithExactly({
         success: true,
         data: {
           testCookie: 'TEST_COOKIE',
@@ -313,9 +321,9 @@ test.serial(
 
     await handler({ method: 'GET' } as NextApiRequestWithMiddleware, res);
 
-    t.true(spiedStatus.calledWith(200));
+    t.true(spiedStatus.calledOnceWithExactly(200));
     t.true(
-      spiedJson.calledWith({
+      spiedJson.calledOnceWithExactly({
         success: true,
         data: {
           testCookie: 'TEST_COOKIE',
@@ -342,22 +350,24 @@ test.serial(
       testCookie: 'TEST_COOKIE',
     });
 
-    const userMiddleware = (req: NextApiRequestWithMiddleware): FakeUser => ({
+    const userMiddleware = (
+      req: NextApiRequestWithMiddleware<FakeCookie>
+    ): FakeUser => ({
       user: {
         id: '1',
         name: 'TEST_USER',
-        testCookie: req.middleware.testCookie as string,
+        testCookie: req.middleware.testCookie,
       },
     });
 
     router.inject<FakeCookie>(cookieMiddleware);
-    router.use<FakeUser>(userMiddleware);
+    router.use<FakeUser, FakeCookie>(userMiddleware);
 
     await handler({ method: 'GET' } as NextApiRequestWithMiddleware, res);
 
-    t.true(spiedStatus.calledWith(200));
+    t.true(spiedStatus.calledOnceWithExactly(200));
     t.true(
-      spiedJson.calledWith({
+      spiedJson.calledOnceWithExactly({
         success: true,
         data: {
           testCookie: 'TEST_COOKIE',
@@ -400,9 +410,9 @@ test.serial(
 
     await handler({ method: 'GET' } as NextApiRequestWithMiddleware, res);
 
-    t.true(spiedStatus.calledOnceWith(200));
+    t.true(spiedStatus.calledOnceWithExactly(200));
     t.true(
-      spiedJson.calledOnceWith({
+      spiedJson.calledOnceWithExactly({
         success: true,
         data: {
           testCookie: 'TEST_COOKIE',
@@ -420,9 +430,9 @@ test.serial(
 
     await handler({ method: 'POST' } as NextApiRequestWithMiddleware, res);
 
-    t.true(spiedStatus.calledOnceWith(200));
+    t.true(spiedStatus.calledOnceWithExactly(200));
     t.true(
-      spiedJson.calledOnceWith({
+      spiedJson.calledOnceWithExactly({
         success: true,
         data: {
           testCookie: 'TEST_COOKIE',
