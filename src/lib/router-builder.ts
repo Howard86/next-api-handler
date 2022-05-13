@@ -63,6 +63,12 @@ export type RouterMethod =
   | 'POST'
   | 'PUT';
 
+const DEFAULT_MIDDLEWARE_ROUTER_METHOD = 'ALL' as const;
+
+export type MiddlewareRouterMethod =
+  | typeof DEFAULT_MIDDLEWARE_ROUTER_METHOD
+  | RouterMethod;
+
 /**
  * A router builder is next api handler builder that exposes express-like api.
  *
@@ -91,23 +97,33 @@ export type RouterMethod =
  * @returns a builder that can build a next.js api handler.
  */
 export class RouterBuilder {
-  private readonly route: Partial<
+  private readonly routeHandlerMap: Partial<
     Record<
       RouterMethod,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       NextApiHandlerWithMiddleware<unknown, any>
     >
   > = {};
-  private readonly middlewareList: NextApiHandlerWithMiddleware<
-    TypedObject,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    any
-  >[] = [];
-  private readonly middlewareQueue: NextApiHandlerWithMiddleware<
-    TypedObject,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    any
-  >[] = [];
+  private readonly middlewareParallelListMap: Partial<
+    Record<
+      MiddlewareRouterMethod,
+      NextApiHandlerWithMiddleware<
+        TypedObject,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        any
+      >[]
+    >
+  > = {};
+  private readonly middlewareQueueMap: Partial<
+    Record<
+      MiddlewareRouterMethod,
+      NextApiHandlerWithMiddleware<
+        TypedObject,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        any
+      >[]
+    >
+  > = {};
   private readonly routerOptions = {} as Required<RouterBuilderOptions>;
 
   constructor(options: RouterBuilderOptions = {}) {
@@ -125,36 +141,40 @@ export class RouterBuilder {
   }
 
   build(): NextApiHandler {
-    return async (req: NextApiRequest, res: NextApiResponse<ApiResponse>) => {
+    return async (
+      rawReq: NextApiRequest,
+      res: NextApiResponse<ApiResponse>
+    ) => {
       try {
-        const handler = this.route[(req.method as RouterMethod) || 'GET'];
+        const routerMethod = (rawReq.method || 'GET') as RouterMethod;
+        const handler = this.routeHandlerMap[routerMethod];
 
         if (!handler) {
-          res.setHeader('Allow', Object.keys(this.route));
+          res.setHeader('Allow', Object.keys(this.routeHandlerMap));
           throw new MethodNotAllowedException(
-            `Method ${req.method} Not Allowed`
+            `Method ${routerMethod} Not Allowed`
           );
         }
 
-        (req as NextApiRequestWithMiddleware).middleware = {};
+        const req = rawReq as NextApiRequestWithMiddleware;
+        req.middleware = {};
 
-        if (this.middlewareList.length > 0) {
-          await this.handleMiddlewareList(
-            req as NextApiRequestWithMiddleware,
+        await Promise.all(
+          this.getMiddlewarePromiseList(
+            DEFAULT_MIDDLEWARE_ROUTER_METHOD,
+            req,
             res
-          );
-        }
-
-        if (this.middlewareQueue.length > 0) {
-          await this.handleMiddlewareQueue(
-            req as NextApiRequestWithMiddleware,
-            res
-          );
-        }
-
-        const data = await Promise.resolve(
-          handler(req as NextApiRequestWithMiddleware, res)
+          ).concat(this.getMiddlewarePromiseList(routerMethod, req, res))
         );
+
+        await this.resolveMiddlewareQueue(
+          DEFAULT_MIDDLEWARE_ROUTER_METHOD,
+          req,
+          res
+        );
+        await this.resolveMiddlewareQueue(routerMethod, req, res);
+
+        const data = await Promise.resolve(handler(req, res));
 
         if (!res.headersSent) {
           res.status(200).json({
@@ -163,31 +183,35 @@ export class RouterBuilder {
           });
         }
       } catch (error) {
-        this.routerOptions.error(req, res, error as Error);
+        this.routerOptions.error(rawReq, res, error as Error);
       }
     };
   }
 
-  use<T extends TypedObject = TypedObject, M extends TypedObject = TypedObject>(
-    handler: NextApiHandlerWithMiddleware<T, M>
-  ): RouterBuilder {
-    this.middlewareQueue.push(handler);
-    return this;
+  private getMiddlewarePromiseList(
+    method: MiddlewareRouterMethod,
+    req: NextApiRequestWithMiddleware,
+    res: NextApiResponse<ApiResponse>
+  ): Promise<void>[] {
+    if (!Array.isArray(this.middlewareParallelListMap[method])) return [];
+
+    return this.middlewareParallelListMap[method]!.map(async (middleware) => {
+      const middlewareValue = await Promise.resolve(middleware(req, res));
+
+      for (const middlewareKey of Object.keys(middlewareValue)) {
+        req.middleware[middlewareKey] = middlewareValue[middlewareKey];
+      }
+    });
   }
 
-  inject<
-    T extends TypedObject = TypedObject,
-    M extends TypedObject = TypedObject
-  >(handler: NextApiHandlerWithMiddleware<T, M>): RouterBuilder {
-    this.middlewareList.push(handler);
-    return this;
-  }
-
-  private async handleMiddlewareQueue(
+  private async resolveMiddlewareQueue(
+    method: MiddlewareRouterMethod,
     req: NextApiRequestWithMiddleware,
     res: NextApiResponse<ApiResponse>
   ): Promise<void> {
-    for (const middleware of this.middlewareQueue) {
+    if (!Array.isArray(this.middlewareQueueMap[method])) return;
+
+    for (const middleware of this.middlewareQueueMap[method]!) {
       const middlewareValue = await Promise.resolve(middleware(req, res));
 
       for (const middlewareKey of Object.keys(middlewareValue)) {
@@ -196,80 +220,132 @@ export class RouterBuilder {
     }
   }
 
-  private async handleMiddlewareList(
-    req: NextApiRequestWithMiddleware,
-    res: NextApiResponse<ApiResponse>
-  ): Promise<void> {
-    await Promise.all(
-      this.middlewareList.map(async (middleware) => {
-        const middlewareValue = await Promise.resolve(middleware(req, res));
+  use<T extends TypedObject = TypedObject, M extends TypedObject = TypedObject>(
+    middlewareRouterMethod: MiddlewareRouterMethod,
+    handler: NextApiHandlerWithMiddleware<T, M>
+  ): RouterBuilder;
+  use<T extends TypedObject = TypedObject, M extends TypedObject = TypedObject>(
+    handler: NextApiHandlerWithMiddleware<T, M>
+  ): RouterBuilder;
+  use<T extends TypedObject = TypedObject, M extends TypedObject = TypedObject>(
+    methodOrHandler:
+      | MiddlewareRouterMethod
+      | NextApiHandlerWithMiddleware<T, M>,
+    handler?: NextApiHandlerWithMiddleware<T, M>
+  ): RouterBuilder {
+    const isHandler = typeof methodOrHandler !== 'string';
 
-        for (const middlewareKey of Object.keys(middlewareValue)) {
-          req.middleware[middlewareKey] = middlewareValue[middlewareKey];
-        }
-      })
+    this.addToPartialArrayMap(
+      this.middlewareQueueMap,
+      isHandler ? DEFAULT_MIDDLEWARE_ROUTER_METHOD : methodOrHandler,
+      isHandler ? methodOrHandler : handler
     );
+
+    return this;
+  }
+
+  inject<
+    T extends TypedObject = TypedObject,
+    M extends TypedObject = TypedObject
+  >(
+    middlewareRouterMethod: MiddlewareRouterMethod,
+    handler: NextApiHandlerWithMiddleware<T, M>
+  ): RouterBuilder;
+  inject<
+    T extends TypedObject = TypedObject,
+    M extends TypedObject = TypedObject
+  >(handler: NextApiHandlerWithMiddleware<T, M>): RouterBuilder;
+  inject<
+    T extends TypedObject = TypedObject,
+    M extends TypedObject = TypedObject
+  >(
+    methodOrHandler:
+      | MiddlewareRouterMethod
+      | NextApiHandlerWithMiddleware<T, M>,
+    handler?: NextApiHandlerWithMiddleware<T, M>
+  ): RouterBuilder {
+    const isSingleParam = typeof methodOrHandler !== 'string';
+
+    this.addToPartialArrayMap(
+      this.middlewareParallelListMap,
+      isSingleParam ? DEFAULT_MIDDLEWARE_ROUTER_METHOD : methodOrHandler,
+      isSingleParam ? methodOrHandler : handler
+    );
+
+    return this;
+  }
+
+  private addToPartialArrayMap<K extends string, V>(
+    map: Partial<Record<K, V[]>>,
+    key: K,
+    value: V
+  ): void {
+    if (Array.isArray(map[key])) {
+      map[key]!.push(value);
+    } else {
+      map[key] = [value];
+    }
   }
 
   get<T, M extends TypedObject = TypedObject>(
     handler: NextApiHandlerWithMiddleware<T, M>
   ): RouterBuilder {
-    return this.add('GET', handler);
+    return this.addRouterMethod('GET', handler);
   }
 
   head<T, M extends TypedObject = TypedObject>(
     handler: NextApiHandlerWithMiddleware<T, M>
   ): RouterBuilder {
-    return this.add('HEAD', handler);
+    return this.addRouterMethod('HEAD', handler);
   }
 
   patch<T, M extends TypedObject = TypedObject>(
     handler: NextApiHandlerWithMiddleware<T, M>
   ): RouterBuilder {
-    return this.add('PATCH', handler);
+    return this.addRouterMethod('PATCH', handler);
   }
 
   options<T, M extends TypedObject = TypedObject>(
     handler: NextApiHandlerWithMiddleware<T, M>
   ): RouterBuilder {
-    return this.add('OPTIONS', handler);
+    return this.addRouterMethod('OPTIONS', handler);
   }
 
   connect<T, M extends TypedObject = TypedObject>(
     handler: NextApiHandlerWithMiddleware<T, M>
   ): RouterBuilder {
-    return this.add('CONNECT', handler);
+    return this.addRouterMethod('CONNECT', handler);
   }
 
   delete<T, M extends TypedObject = TypedObject>(
     handler: NextApiHandlerWithMiddleware<T, M>
   ): RouterBuilder {
-    return this.add('DELETE', handler);
+    return this.addRouterMethod('DELETE', handler);
   }
 
   trace<T, M extends TypedObject = TypedObject>(
     handler: NextApiHandlerWithMiddleware<T, M>
   ): RouterBuilder {
-    return this.add('TRACE', handler);
+    return this.addRouterMethod('TRACE', handler);
   }
 
   post<T, M extends TypedObject = TypedObject>(
     handler: NextApiHandlerWithMiddleware<T, M>
   ): RouterBuilder {
-    return this.add('POST', handler);
+    return this.addRouterMethod('POST', handler);
   }
 
   put<T, M extends TypedObject = TypedObject>(
     handler: NextApiHandlerWithMiddleware<T, M>
   ): RouterBuilder {
-    return this.add('PUT', handler);
+    return this.addRouterMethod('PUT', handler);
   }
 
-  private add<T, M extends TypedObject>(
+  private addRouterMethod<T, M extends TypedObject>(
     method: RouterMethod,
     handler: NextApiHandlerWithMiddleware<T, M>
   ): RouterBuilder {
-    this.route[method] = handler;
+    this.routeHandlerMap[method] = handler;
     return this;
   }
 }
