@@ -4,6 +4,7 @@ import { DEFAULT_MIDDLEWARE_ROUTER_METHOD } from './constants';
 import { makeErrorHandler } from './error-handler';
 import { MethodNotAllowedException } from './http-exceptions';
 import {
+  AddMiddleware,
   ApiResponse,
   InternalMiddlewareMap,
   MiddlewareRouterMethod,
@@ -74,10 +75,8 @@ export class RouterBuilder {
         const handler = this.routeHandlerMap[routerMethod];
 
         if (!handler) {
-          res.setHeader('Allow', Object.keys(this.routeHandlerMap));
-          throw new MethodNotAllowedException(
-            `Method ${routerMethod} Not Allowed`
-          );
+          this.handleSendMethodNotFoundException(res, routerMethod);
+          return;
         }
 
         await this.resolveMiddlewareListAndQueue(
@@ -88,16 +87,31 @@ export class RouterBuilder {
 
         const data = await handler(req as NextApiRequestWithMiddleware, res);
 
-        if (!res.headersSent) {
-          res.status(200).json({
-            success: true,
-            data,
-          });
-        }
+        this.handleSendSuccessResponse(res, data);
       } catch (error) {
         this.routerOptions.error(req, res, error as Error);
       }
     };
+  }
+
+  private handleSendSuccessResponse<T>(
+    res: NextApiResponse<ApiResponse<T>>,
+    data: T
+  ) {
+    if (!res.headersSent) {
+      res.status(200).json({
+        success: true,
+        data,
+      });
+    }
+  }
+
+  private handleSendMethodNotFoundException(
+    res: NextApiResponse,
+    routerMethod: RouterMethod
+  ) {
+    res.setHeader('Allow', Object.keys(this.routeHandlerMap));
+    throw new MethodNotAllowedException(`Method ${routerMethod} Not Allowed`);
   }
 
   private async resolveMiddlewareListAndQueue(
@@ -169,35 +183,27 @@ export class RouterBuilder {
       handler?: NextApiHandlerWithMiddleware<T, M>
     ): RouterBuilder => {
       const isSingleParam = typeof methodOrHandler !== 'string';
-      const middlewareMethod = isSingleParam
-        ? DEFAULT_MIDDLEWARE_ROUTER_METHOD
-        : methodOrHandler;
-      const middlewareHandler = isSingleParam
-        ? methodOrHandler
-        : (handler as NextApiHandlerWithMiddleware<T, M>);
 
-      if (Array.isArray(middlewareMap[middlewareMethod])) {
-        middlewareMap[middlewareMethod]!.push(middlewareHandler);
-      } else {
-        middlewareMap[middlewareMethod] = [middlewareHandler];
-      }
+      this.addOrSetPartialArrayMap(
+        middlewareMap,
+        isSingleParam ? DEFAULT_MIDDLEWARE_ROUTER_METHOD : methodOrHandler,
+        isSingleParam ? methodOrHandler : handler
+      );
 
       return this;
-    }) as {
-      <
-        T extends TypedObject = TypedObject,
-        M extends TypedObject = TypedObject
-      >(
-        method: MiddlewareRouterMethod,
-        handler: NextApiHandlerWithMiddleware<T, M>
-      ): RouterBuilder;
-      <
-        T extends TypedObject = TypedObject,
-        M extends TypedObject = TypedObject
-      >(
-        handler: NextApiHandlerWithMiddleware<T, M>
-      ): RouterBuilder;
-    };
+    }) as AddMiddleware<RouterBuilder>;
+  }
+
+  private addOrSetPartialArrayMap<K extends string, V>(
+    partialMap: Partial<Record<K, V[]>>,
+    mapKey: K,
+    mapValue: V
+  ) {
+    if (Array.isArray(partialMap[mapKey])) {
+      partialMap[mapKey]!.push(mapValue);
+    } else {
+      partialMap[mapKey] = [mapValue];
+    }
   }
 
   readonly get = this.addRouterMethod('GET');

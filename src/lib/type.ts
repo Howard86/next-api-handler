@@ -77,3 +77,13 @@ export type RouterMethod =
 export type MiddlewareRouterMethod =
   | typeof DEFAULT_MIDDLEWARE_ROUTER_METHOD
   | RouterMethod;
+
+export type AddMiddleware<R> = {
+  <T extends TypedObject = TypedObject, M extends TypedObject = TypedObject>(
+    method: MiddlewareRouterMethod,
+    handler: NextApiHandlerWithMiddleware<T, M>
+  ): R;
+  <T extends TypedObject = TypedObject, M extends TypedObject = TypedObject>(
+    handler: NextApiHandlerWithMiddleware<T, M>
+  ): R;
+};
