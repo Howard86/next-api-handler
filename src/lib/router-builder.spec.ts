@@ -371,3 +371,63 @@ test.serial(
     );
   }
 );
+
+test.serial(
+  'should only inject specific RESTful method middleware',
+  async (t) => {
+    router.get((req) => req.middleware);
+    router.post((req) => req.middleware);
+    const handler = router.build();
+
+    const cookieMiddleware = (
+      _req: NextApiRequestWithMiddleware
+    ): FakeCookie => ({
+      testCookie: 'TEST_COOKIE',
+    });
+
+    const userMiddleware = (
+      req: NextApiRequestWithMiddleware<FakeCookie>
+    ): FakeUser => ({
+      user: {
+        id: '1',
+        name: 'TEST_USER',
+        testCookie: req.middleware.testCookie,
+      },
+    });
+
+    router.inject<FakeCookie>('ALL', cookieMiddleware);
+    router.use<FakeUser, FakeCookie>('GET', userMiddleware);
+
+    await handler({ method: 'GET' } as NextApiRequestWithMiddleware, res);
+
+    t.true(spiedStatus.calledOnceWith(200));
+    t.true(
+      spiedJson.calledOnceWith({
+        success: true,
+        data: {
+          testCookie: 'TEST_COOKIE',
+          user: {
+            id: '1',
+            name: 'TEST_USER',
+            testCookie: 'TEST_COOKIE',
+          },
+        },
+      })
+    );
+
+    spiedStatus.resetHistory();
+    spiedJson.resetHistory();
+
+    await handler({ method: 'POST' } as NextApiRequestWithMiddleware, res);
+
+    t.true(spiedStatus.calledOnceWith(200));
+    t.true(
+      spiedJson.calledOnceWith({
+        success: true,
+        data: {
+          testCookie: 'TEST_COOKIE',
+        },
+      })
+    );
+  }
+);
