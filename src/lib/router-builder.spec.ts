@@ -2,12 +2,12 @@ import test from 'ava';
 import type { NextApiResponse } from 'next';
 import sinon, { SinonSpy } from 'sinon';
 
+import { RouterBuilder } from './router-builder';
 import {
   ErrorApiResponse,
   NextApiRequestWithMiddleware,
-  RouterBuilder,
   SuccessApiResponse,
-} from './router-builder';
+} from './type';
 
 const ROUTING_METHODS = [
   'get',
