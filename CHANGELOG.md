@@ -1,3 +1,12 @@
+# [0.3.0](https://github.com/Howard86/next-api-handler/compare/v0.2.5...v0.3.0) (2022-05-14)
+
+
+### Features
+
+* accept method specific middleware, resolve [#32](https://github.com/Howard86/next-api-handler/issues/32) ([915921c](https://github.com/Howard86/next-api-handler/commit/915921c734c53a5ddce4251680c8f816f693c122))
+
+
+
 ## [0.2.5](https://github.com/Howard86/next-api-handler/compare/v0.2.4...v0.2.5) (2022-04-13)
 
 
@@ -32,15 +41,6 @@
 ### Bug Fixes
 
 * update example api ([3fa64cb](https://github.com/Howard86/next-api-handler/commit/3fa64cb64fc29d26c9058b499c431810ad45c866))
-
-
-
-## [0.2.1](https://github.com/Howard86/next-api-handler/compare/v0.2.0...v0.2.1) (2022-01-01)
-
-
-### Bug Fixes
-
-* **type:** remove nextjs type redeclaration with NextApiRequestWithMiddleware ([f4f922a](https://github.com/Howard86/next-api-handler/commit/f4f922abace90f986d817d24be38e358c61b4cfe))
 
 
 
