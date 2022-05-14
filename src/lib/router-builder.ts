@@ -1,56 +1,16 @@
 import type { NextApiHandler, NextApiRequest, NextApiResponse } from 'next';
 
-import { ApiErrorHandler, makeErrorHandler } from './error-handler';
+import { DEFAULT_MIDDLEWARE_ROUTER_METHOD } from './constants';
+import { makeErrorHandler } from './error-handler';
+import { ExpressLikeRouter } from './express-like-router';
 import { MethodNotAllowedException } from './http-exceptions';
-
-/**
- *  an utility type to shorten writing Record<string, T = unknown>
- */
-export type TypedObject<T = unknown> = Record<string, T>;
-
-/**
- *  a standard next.js api handler but with req.middleware available
- *  see [official doc](https://nextjs.org/docs/api-routes/introduction) for more details
- */
-export type NextApiHandlerWithMiddleware<
-  T = unknown,
-  M extends TypedObject = TypedObject
-> = (
-  req: NextApiRequestWithMiddleware<M>,
-  res: NextApiResponse
-) => T | Promise<T>;
-
-/**
- *  a standard next.js api request but with req.middleware available
- */
-export interface NextApiRequestWithMiddleware<
-  M extends TypedObject = TypedObject
-> extends NextApiRequest {
-  middleware: M;
-}
-
-/**
- *  all api response combines success response & error response
- */
-export type ApiResponse<T = unknown> = SuccessApiResponse<T> | ErrorApiResponse;
-
-/**
- *  api response that has http status code 2xx with data
- */
-export type SuccessApiResponse<T> = { success: true; data: T };
-
-/**
- *  api response that has http status code 4xx or 5xx with error message
- */
-export type ErrorApiResponse = { success: false; message: string };
-
-/**
- * RouterBuilder options
- */
-export type RouterBuilderOptions = Partial<{
-  error: ApiErrorHandler;
-  showMessage: boolean;
-}>;
+import {
+  ApiResponse,
+  MiddlewareRouterMethod,
+  NextApiRequestWithMiddleware,
+  RouterBuilderOptions,
+  RouterMethod,
+} from './type';
 
 /**
  * A router builder is next api handler builder that exposes express-like api.
@@ -79,25 +39,43 @@ export type RouterBuilderOptions = Partial<{
  *
  * @returns a builder that can build a next.js api handler.
  */
-export class RouterBuilder {
-  private readonly route: Record<
-    string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    NextApiHandlerWithMiddleware<unknown, any>
-  > = {};
-  private readonly middlewareList: NextApiHandlerWithMiddleware<
-    TypedObject,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    any
-  >[] = [];
-  private readonly middlewareQueue: NextApiHandlerWithMiddleware<
-    TypedObject,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    any
-  >[] = [];
+export class RouterBuilder extends ExpressLikeRouter {
   private readonly routerOptions = {} as Required<RouterBuilderOptions>;
 
   constructor(options: RouterBuilderOptions = {}) {
+    super();
+    this.applyErrorHandler(options);
+  }
+
+  public build(): NextApiHandler {
+    return async (req: NextApiRequest, res: NextApiResponse<ApiResponse>) => {
+      try {
+        const routerMethod = (req.method || 'GET') as RouterMethod;
+        const handler = this.routeHandlerMap[routerMethod];
+
+        if (!handler) {
+          res.setHeader('Allow', Object.keys(this.routeHandlerMap));
+          throw new MethodNotAllowedException(
+            `Method ${routerMethod} Not Allowed`
+          );
+        }
+
+        await this.resolveMiddlewareListAndQueue(
+          routerMethod,
+          req as NextApiRequestWithMiddleware,
+          res
+        );
+
+        const data = await handler(req as NextApiRequestWithMiddleware, res);
+
+        this.handleSendSuccessResponse(res, data);
+      } catch (error) {
+        this.routerOptions.error(req, res, error as Error);
+      }
+    };
+  }
+
+  private applyErrorHandler(options: RouterBuilderOptions) {
     this.routerOptions.error =
       options.error ||
       makeErrorHandler(
@@ -107,152 +85,70 @@ export class RouterBuilder {
       );
   }
 
-  get<T, M extends TypedObject = TypedObject>(
-    handler: NextApiHandlerWithMiddleware<T, M>
-  ): RouterBuilder {
-    return this.add('GET', handler);
+  private handleSendSuccessResponse<T>(
+    res: NextApiResponse<ApiResponse<T>>,
+    data: T
+  ) {
+    if (!res.headersSent) {
+      res.status(200).json({
+        success: true,
+        data,
+      });
+    }
   }
 
-  head<T, M extends TypedObject = TypedObject>(
-    handler: NextApiHandlerWithMiddleware<T, M>
-  ): RouterBuilder {
-    return this.add('HEAD', handler);
-  }
-
-  patch<T, M extends TypedObject = TypedObject>(
-    handler: NextApiHandlerWithMiddleware<T, M>
-  ): RouterBuilder {
-    return this.add('PATCH', handler);
-  }
-
-  options<T, M extends TypedObject = TypedObject>(
-    handler: NextApiHandlerWithMiddleware<T, M>
-  ): RouterBuilder {
-    return this.add('OPTIONS', handler);
-  }
-
-  connect<T, M extends TypedObject = TypedObject>(
-    handler: NextApiHandlerWithMiddleware<T, M>
-  ): RouterBuilder {
-    return this.add('CONNECT', handler);
-  }
-
-  delete<T, M extends TypedObject = TypedObject>(
-    handler: NextApiHandlerWithMiddleware<T, M>
-  ): RouterBuilder {
-    return this.add('DELETE', handler);
-  }
-
-  trace<T, M extends TypedObject = TypedObject>(
-    handler: NextApiHandlerWithMiddleware<T, M>
-  ): RouterBuilder {
-    return this.add('TRACE', handler);
-  }
-
-  post<T, M extends TypedObject = TypedObject>(
-    handler: NextApiHandlerWithMiddleware<T, M>
-  ): RouterBuilder {
-    return this.add('POST', handler);
-  }
-
-  put<T, M extends TypedObject = TypedObject>(
-    handler: NextApiHandlerWithMiddleware<T, M>
-  ): RouterBuilder {
-    return this.add('PUT', handler);
-  }
-
-  use<T extends TypedObject = TypedObject, M extends TypedObject = TypedObject>(
-    handler: NextApiHandlerWithMiddleware<T, M>
-  ): RouterBuilder {
-    this.middlewareQueue.push(handler);
-    return this;
-  }
-
-  inject<
-    T extends TypedObject = TypedObject,
-    M extends TypedObject = TypedObject
-  >(handler: NextApiHandlerWithMiddleware<T, M>): RouterBuilder {
-    this.middlewareList.push(handler);
-    return this;
-  }
-
-  build(): NextApiHandler {
-    return async (req: NextApiRequest, res: NextApiResponse<ApiResponse>) => {
-      try {
-        const handler = this.route[req.method || 'GET'];
-
-        if (!handler) {
-          res.setHeader('Allow', Object.keys(this.route));
-          throw new MethodNotAllowedException(
-            `Method ${req.method} Not Allowed`
-          );
-        }
-
-        (req as NextApiRequestWithMiddleware).middleware = {};
-
-        if (this.middlewareList.length > 0) {
-          await this.handleMiddlewareList(
-            req as NextApiRequestWithMiddleware,
-            res
-          );
-        }
-
-        if (this.middlewareQueue.length > 0) {
-          await this.handleMiddlewareQueue(
-            req as NextApiRequestWithMiddleware,
-            res
-          );
-        }
-
-        const data = await Promise.resolve(
-          handler(req as NextApiRequestWithMiddleware, res)
-        );
-
-        if (!res.headersSent) {
-          res.status(200).json({
-            success: true,
-            data,
-          });
-        }
-      } catch (error) {
-        this.routerOptions.error(req, res, error as Error);
-      }
-    };
-  }
-
-  private async handleMiddlewareQueue(
+  private async resolveMiddlewareListAndQueue(
+    routerMethod: RouterMethod,
     req: NextApiRequestWithMiddleware,
     res: NextApiResponse<ApiResponse>
   ): Promise<void> {
-    for (const middleware of this.middlewareQueue) {
+    req.middleware = {};
+
+    await Promise.all(
+      this.getMiddlewarePromiseList(
+        DEFAULT_MIDDLEWARE_ROUTER_METHOD,
+        req,
+        res
+      ).concat(this.getMiddlewarePromiseList(routerMethod, req, res))
+    );
+
+    await this.resolveMiddlewareQueue(
+      DEFAULT_MIDDLEWARE_ROUTER_METHOD,
+      req,
+      res
+    );
+    await this.resolveMiddlewareQueue(routerMethod, req, res);
+  }
+
+  private getMiddlewarePromiseList(
+    method: MiddlewareRouterMethod,
+    req: NextApiRequestWithMiddleware,
+    res: NextApiResponse<ApiResponse>
+  ): Promise<void>[] {
+    if (!Array.isArray(this.middlewareParallelListMap[method])) return [];
+
+    return this.middlewareParallelListMap[method]!.map(async (middleware) => {
+      const middlewareValue = await Promise.resolve(middleware(req, res));
+
+      for (const middlewareKey of Object.keys(middlewareValue)) {
+        req.middleware[middlewareKey] = middlewareValue[middlewareKey];
+      }
+    });
+  }
+
+  private async resolveMiddlewareQueue(
+    method: MiddlewareRouterMethod,
+    req: NextApiRequestWithMiddleware,
+    res: NextApiResponse<ApiResponse>
+  ): Promise<void> {
+    if (!Array.isArray(this.middlewareQueueMap[method])) return;
+
+    for (const middleware of this.middlewareQueueMap[method]!) {
       const middlewareValue = await Promise.resolve(middleware(req, res));
 
       for (const middlewareKey of Object.keys(middlewareValue)) {
         req.middleware[middlewareKey] = middlewareValue[middlewareKey];
       }
     }
-  }
-
-  private async handleMiddlewareList(
-    req: NextApiRequestWithMiddleware,
-    res: NextApiResponse<ApiResponse>
-  ): Promise<void> {
-    await Promise.all(
-      this.middlewareList.map(async (middleware) => {
-        const middlewareValue = await Promise.resolve(middleware(req, res));
-
-        for (const middlewareKey of Object.keys(middlewareValue)) {
-          req.middleware[middlewareKey] = middlewareValue[middlewareKey];
-        }
-      })
-    );
-  }
-
-  private add<T, M extends TypedObject>(
-    method: string,
-    handler: NextApiHandlerWithMiddleware<T, M>
-  ): RouterBuilder {
-    this.route[method] = handler;
-    return this;
   }
 }
