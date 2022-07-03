@@ -71,7 +71,7 @@
     "nyc": "^15.1.0",
     "open-cli": "^7.0.1",
     "prettier": "^2.6.2",
-    "sinon": "^13.0.2",
+    "sinon": "^14.0.0",
     "standard-version": "^9.5.0",
     "ts-node": "^10.7.0",
     "typedoc": "^0.22.15",
