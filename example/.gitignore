@@ -32,6 +32,3 @@ yarn-error.log*
 
 # vercel
 .vercel
-
-# for fresh build
-yarn.lock
