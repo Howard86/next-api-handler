@@ -2,35 +2,12 @@
 version: 2.1
 orbs:
   codecov: codecov/codecov@3.2.0
-jobs:
-  cypress:
+  cypress: cypress-io/cypress@2.1.0
+executors:
+  cypress-node:
     docker:
-      - image: cypress/base:14.19.0
-        environment:
-          ## this enables colors in the output
-          TERM: xterm
-    working_directory: ~/project/example
-    steps:
-      - checkout:
-          path: ~/project
-      - restore_cache:
-          keys:
-            - v1-deps-{{ .Branch }}-{{ checksum "package.json" }}
-            - v1-deps-{{ .Branch }}
-            - v1-deps
-      - run:
-          name: Install Dependencies
-          command: yarn install --frozen-lockfile
-      - save_cache:
-          key: v1-deps-{{ .Branch }}-{{ checksum "package.json" }}
-          paths:
-            - ~/.cache ## cache both yarn and Cypress!
-      - run:
-          name: Build production bundle
-          command: yarn build
-      - run:
-          name: Run end-to-end test in headless mode
-          command: yarn start-server-and-test 'yarn start' http://localhost:3000 'yarn cypress:headless --record --key $CYPRESS_RECORD_KEY'
+      - image: 'cypress/base:16.17.0'
+jobs:
   'node-14':
     docker:
       - image: cimg/node:14.17
@@ -38,13 +15,12 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "package.json" }}
-            - v1-dependencies-
+            - v1-dependencies-{{ checksum "yarn.lock" }}
       - run: yarn install
       - save_cache:
           paths:
             - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
+          key: v1-dependencies-{{ checksum "yarn.lock" }}
       - run: yarn test
       - run: yarn cov:send
       - run: yarn cov:check
@@ -55,13 +31,13 @@ jobs:
       - checkout
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "package.json" }}
+            - v1-dependencies-{{ checksum "yarn.lock" }}
             - v1-dependencies-
       - run: yarn install
       - save_cache:
           paths:
             - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}
+          key: v1-dependencies-{{ checksum "yarn.lock" }}
       - run: yarn test
       - run: yarn cov:send
       - run: yarn cov:check
@@ -72,4 +48,12 @@ workflows:
     jobs:
       - 'node-14'
       - 'node-lts'
-      - 'cypress'
+      - cypress/run:
+          executor: cypress-node
+          working_directory: example
+          yarn: true
+          record: true
+          tags: circleci
+          build: yarn build
+          start: yarn start
+          install-command: yarn install --frozen-lockfile
