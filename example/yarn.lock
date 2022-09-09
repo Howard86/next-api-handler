@@ -1019,9 +1019,10 @@ nanoid@^3.3.4:
   resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-3.3.4.tgz#730b67e3cd09e2deacf03c027c81c9d9dbc5e8ab"
   integrity sha512-MqBkQh/OHTS2egovRtLk45wEyNXwF+cokD+1YPf9u5VfJiRdAiRwB2froX5Co9Rh20xs4siNPm8naNotSD6RBw==
 
-"next-api-handler@link:./..":
-  version "0.0.0"
-  uid ""
+next-api-handler@0.3.1:
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/next-api-handler/-/next-api-handler-0.3.1.tgz#c3f0fab9e666365f10adea36895a51446654ef2d"
+  integrity sha512-YE3vsST2mA5Fjo6IiS0rJyLviNQK282vmAwyhejvS92ldGKhldjFJPoH/emoxSvbiLirof6mslFZmPOBQMVs0w==
 
 next@^12.2.5:
   version "12.2.5"

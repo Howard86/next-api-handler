@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "next": "^12.2.5",
-    "next-api-handler": "link:./..",
+    "next-api-handler": "0.3.1",
     "react": "^17",
     "react-dom": "^17"
   },
