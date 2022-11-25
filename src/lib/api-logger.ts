@@ -12,12 +12,11 @@ enum LoggerLevelMap {
   info,
   warn,
   error,
+  silent,
 }
 
 export type LoggerLevel = keyof typeof LoggerLevelMap;
 
-const DEFAULT_LOGGER_LEVEL: LoggerLevel =
-  process.env.NODE_ENV === 'development' ? 'info' : 'error';
 const DEFAULT_CONTEXT = '[next-api-handler]';
 
 export interface DefaultApiLoggerOption {
@@ -27,15 +26,11 @@ export interface DefaultApiLoggerOption {
 
 export class DefaultApiLogger implements ApiLogger {
   private readonly context: string;
-  private readonly level: number;
-  private readonly DEFAULT_MESSAGE = '';
+  private readonly level: LoggerLevel;
 
-  constructor({
-    context = DEFAULT_CONTEXT,
-    loggerLevel = DEFAULT_LOGGER_LEVEL,
-  }: DefaultApiLoggerOption = {}) {
-    this.context = context;
-    this.level = LoggerLevelMap[loggerLevel];
+  constructor(option: DefaultApiLoggerOption = {}) {
+    this.context = option.context || DEFAULT_CONTEXT;
+    this.level = option.loggerLevel || this.defaultLoggerLevel;
   }
 
   debug = this.logMessage('debug');
@@ -43,16 +38,21 @@ export class DefaultApiLogger implements ApiLogger {
   warn = this.logMessage('warn');
   error = this.logMessage('error');
 
-  private logMessage(level: LoggerLevel) {
-    if (this.level > LoggerLevelMap[level]) return this.emptyFunction;
-
-    return (message = this.DEFAULT_MESSAGE) => {
-      console[level](
-        `${this.context} ${level} ${new Date().toISOString()} ${message}`
-      );
-    };
+  private get defaultLoggerLevel(): LoggerLevel {
+    return process.env.NODE_ENV === 'test'
+      ? 'silent'
+      : process.env.NODE_ENV === 'development'
+      ? 'info'
+      : 'error';
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  private emptyFunction(_message?: string) {}
+  private logMessage(level: Exclude<LoggerLevel, 'silent'>) {
+    return (message?: string) => {
+      if (LoggerLevelMap[this.level] <= LoggerLevelMap[level]) {
+        console[level](
+          `${this.context} ${level} ${new Date().toISOString()} ${message}`
+        );
+      }
+    };
+  }
 }
