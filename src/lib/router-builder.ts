@@ -83,9 +83,11 @@ export class RouterBuilder extends ExpressLikeRouter {
         );
       } catch (error) {
         this.routerOptions.error(req, res, error as Error);
-        `Caught errors from ${routerMethod} ${req.url} with ${
-          Date.now() - initiatedTime
-        }ms`;
+        this.logger.error(
+          `Caught errors from ${routerMethod} ${req.url} with ${
+            Date.now() - initiatedTime
+          }ms`
+        );
       }
     };
   }

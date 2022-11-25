@@ -6,7 +6,7 @@ import { makeErrorHandler } from './error-handler';
 import { HttpException } from './http-exceptions';
 import { ErrorApiResponse } from './type';
 
-const req = {} as unknown as NextApiRequest;
+const req = { url: '/' } as NextApiRequest;
 const res = {
   status(_statusCode: number) {
     return this;
