@@ -1,8 +1,13 @@
-# Changelog
+## [0.4.2](https://github.com/Howard86/next-api-handler/compare/v0.4.0...v0.4.2) (2022-11-29)
 
-All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-## [0.4.0](https://github.com/Howard86/next-api-handler/compare/v0.3.1...v0.4.0) (2022-11-29)
+### Bug Fixes
+
+* fix incorrect nextjs peer deps version ([2d4d9a1](https://github.com/Howard86/next-api-handler/commit/2d4d9a184a4ad9b2410f08057c4ddb62449efe70))
+
+
+
+# [0.4.0](https://github.com/Howard86/next-api-handler/compare/v0.3.1...v0.4.0) (2022-11-29)
 
 
 ### Bug Fixes
@@ -10,7 +15,11 @@ All notable changes to this project will be documented in this file. See [standa
 * fix incorrect logger setup when introducing environmental variables ([ed9068f](https://github.com/Howard86/next-api-handler/commit/ed9068fed5cefb17388afff2ff1529c7481b7bc2))
 * **logger:** add api-logger with new router options ([d237e3c](https://github.com/Howard86/next-api-handler/commit/d237e3ce942487ecb0039379daadb407b726824b))
 
-### [0.3.1](https://github.com/Howard86/next-api-handler/compare/v0.3.0...v0.3.1) (2022-09-08)
+
+
+## [0.3.1](https://github.com/Howard86/next-api-handler/compare/v0.3.0...v0.3.1) (2022-09-08)
+
+
 
 # [0.3.0](https://github.com/Howard86/next-api-handler/compare/v0.2.5...v0.3.0) (2022-05-14)
 
@@ -31,27 +40,3 @@ All notable changes to this project will be documented in this file. See [standa
 
 
 
-## [0.2.4](https://github.com/Howard86/next-api-handler/compare/v0.2.3...v0.2.4) (2022-02-24)
-
-
-### Bug Fixes
-
-* fix typescript issues after depedencies bump ([f0a0c90](https://github.com/Howard86/next-api-handler/commit/f0a0c90c9bd4e8ad6023fe52a24f70a46e36e634))
-
-
-
-## [0.2.3](https://github.com/Howard86/next-api-handler/compare/v0.2.2...v0.2.3) (2022-02-24)
-
-
-### Bug Fixes
-
-* prevent sending response when header is sent ([e103d88](https://github.com/Howard86/next-api-handler/commit/e103d882dbc8090ac6550f3cc37b9532ccaba904))
-
-
-
-## [0.2.2](https://github.com/Howard86/next-api-handler/compare/v0.2.1...v0.2.2) (2022-01-01)
-
-
-### Bug Fixes
-
-* update example api ([3fa64cb](https://github.com/Howard86/next-api-handler/commit/3fa64cb64fc29d26c9058b499c431810ad45c866))
