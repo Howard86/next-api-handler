@@ -1,6 +1,6 @@
 {
   "name": "next-api-handler",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "lightweight nextjs api handler wrapper, portable & configurable for serverless environment",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",
@@ -115,6 +115,6 @@
     ]
   },
   "peerDependencies": {
-    "next": "^12"
+    "next": ">=9"
   }
 }
