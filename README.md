@@ -8,6 +8,24 @@
 
 lightweight next.js api handler wrapper, portable & configurable for serverless environment
 
+## Table of Contents
+
+- [Introduction](#introduction)
+- [Getting Started](#getting-started)
+  - [Requirements](#requirements)
+  - [Installation](#installation)
+- [Features](#features)
+  - [Basic Usage](#basic-usage)
+  - [More CRUD](#more-crud)
+  - [Handling HTTP Error Response](#handling-http-error-response)
+  - [API Middleware](#api-middleware)
+  - [API Logger](#api-logger)
+- [Utilities](#utilities)
+  - [Type declaration & Type-checking](#type-declaration---type-checking)
+- [Compatibility](#compatibility)
+- [Reference](#reference)
+- [License](#license)
+
 ## Introduction
 
 [next-api-handler](https://www.npmjs.com/package/next-api-handler) contains helper functions and generic types to create next.js [API routes](https://nextjs.org/docs/api-routes/introduction) with strong type declaration and type-checking.
@@ -182,6 +200,54 @@ router.get<string, User>(
 );
 
 export default router.build();
+```
+
+### API Logger
+
+By default, `next-api-handler` will set up a simple console logger to track api calls for debugging purpose.
+
+e.g. When running `yarn dev` and triggering some api calls, we shall see something like the following
+
+```sh
+[next-api-handler] error 2022-11-29T14:15:30.828Z Caught errors from GET /api/after/simple with 0ms
+[next-api-handler] info 2022-11-29T14:16:59.306Z Successfully handled GET /api/after/simple?id=123 with 0ms
+```
+
+This is the default api logger when `NODE_ENV=development` with following default `loggerOption`
+
+```json
+{
+  "context": "[next-api-handler]",
+  "level": "info"
+}
+```
+
+We can simply replace `loggerOption` when initializing the router
+
+```ts
+const router = new RouterBuilder({
+  loggerOption: {
+    context: 'new name',
+    level: 'silent',
+  },
+});
+```
+
+where `context` is the logger context, `level` satisfies type `LoggerLevel` and has available options `debug`, `info`, `warn`, `error`, `silent` in such a way that, when a level is configured, except `silent` only the level after and itself will be logged, e.g. when `level="warn"`, only `logger.warn` & `logger.error` will trigger the logger
+
+When `level="silent"`, all logs will be hidden
+
+By default, `level` is set based on different running environment
+
+```sh
+# when running in development i.e. NODE_ENV=development
+level="info"
+
+# when running in production i.e. NODE_ENV=production
+level="error"
+
+# when running tests i.e. NODE_ENV=test
+level="silent"
 ```
 
 ## Utilities

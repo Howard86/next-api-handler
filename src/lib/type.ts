@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 
+import { ApiLogger, DefaultApiLoggerOption } from './api-logger';
 import { DEFAULT_MIDDLEWARE_ROUTER_METHOD } from './constants';
 import { ApiErrorHandler } from './error-handler';
 
@@ -50,6 +51,8 @@ export type ErrorApiResponse = { success: false; message: string };
 export type RouterBuilderOptions = Partial<{
   error: ApiErrorHandler;
   showMessage: boolean;
+  logger: ApiLogger;
+  loggerOption: DefaultApiLoggerOption;
 }>;
 
 export type InternalMiddlewareMap = Partial<

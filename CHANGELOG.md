@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.4.0](https://github.com/Howard86/next-api-handler/compare/v0.3.1...v0.4.0) (2022-11-29)
+
+
+### Bug Fixes
+
+* fix incorrect logger setup when introducing environmental variables ([ed9068f](https://github.com/Howard86/next-api-handler/commit/ed9068fed5cefb17388afff2ff1529c7481b7bc2))
+* **logger:** add api-logger with new router options ([d237e3c](https://github.com/Howard86/next-api-handler/commit/d237e3ce942487ecb0039379daadb407b726824b))
+
 ### [0.3.1](https://github.com/Howard86/next-api-handler/compare/v0.3.0...v0.3.1) (2022-09-08)
 
 # [0.3.0](https://github.com/Howard86/next-api-handler/compare/v0.2.5...v0.3.0) (2022-05-14)

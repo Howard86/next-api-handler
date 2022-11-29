@@ -1,5 +1,6 @@
 import type { NextApiHandler, NextApiRequest, NextApiResponse } from 'next';
 
+import { ApiLogger, DefaultApiLogger } from './api-logger';
 import { DEFAULT_MIDDLEWARE_ROUTER_METHOD } from './constants';
 import { makeErrorHandler } from './error-handler';
 import { ExpressLikeRouter } from './express-like-router';
@@ -41,19 +42,25 @@ import {
  */
 export class RouterBuilder extends ExpressLikeRouter {
   private readonly routerOptions = {} as Required<RouterBuilderOptions>;
+  private readonly logger: ApiLogger;
 
   constructor(options: RouterBuilderOptions = {}) {
     super();
     this.applyErrorHandler(options);
+    this.logger = options.logger || new DefaultApiLogger(options.loggerOption);
   }
 
   public build(): NextApiHandler {
     return async (req: NextApiRequest, res: NextApiResponse<ApiResponse>) => {
+      const initiatedTime = Date.now();
+      const routerMethod = (req.method || 'GET') as RouterMethod;
+
       try {
-        const routerMethod = (req.method || 'GET') as RouterMethod;
         const handler = this.routeHandlerMap[routerMethod];
+        this.logger.debug(`Initiated ${routerMethod} ${req.url}`);
 
         if (!handler) {
+          this.logger.debug(`Missed handler on ${routerMethod} ${req.url}`);
           res.setHeader('Allow', Object.keys(this.routeHandlerMap));
           throw new MethodNotAllowedException(
             `Method ${routerMethod} Not Allowed`
@@ -69,8 +76,18 @@ export class RouterBuilder extends ExpressLikeRouter {
         const data = await handler(req as NextApiRequestWithMiddleware, res);
 
         this.handleSendSuccessResponse(res, data);
+        this.logger.info(
+          `Successfully handled ${routerMethod} ${req.url} with ${
+            Date.now() - initiatedTime
+          }ms`
+        );
       } catch (error) {
         this.routerOptions.error(req, res, error as Error);
+        this.logger.error(
+          `Caught errors from ${routerMethod} ${req.url} with ${
+            Date.now() - initiatedTime
+          }ms`
+        );
       }
     };
   }
@@ -127,6 +144,12 @@ export class RouterBuilder extends ExpressLikeRouter {
   ): Promise<void>[] {
     if (!Array.isArray(this.middlewareParallelListMap[method])) return [];
 
+    this.logger.debug(
+      `Resolved ${
+        this.middlewareParallelListMap[method]!.length
+      } ${method} middleware list`
+    );
+
     return this.middlewareParallelListMap[method]!.map(async (middleware) => {
       const middlewareValue = await Promise.resolve(middleware(req, res));
 
@@ -142,6 +165,12 @@ export class RouterBuilder extends ExpressLikeRouter {
     res: NextApiResponse<ApiResponse>
   ): Promise<void> {
     if (!Array.isArray(this.middlewareQueueMap[method])) return;
+
+    this.logger.debug(
+      `Resolved ${
+        this.middlewareQueueMap[method]!.length
+      } ${method} middleware queue`
+    );
 
     for (const middleware of this.middlewareQueueMap[method]!) {
       const middlewareValue = await Promise.resolve(middleware(req, res));
