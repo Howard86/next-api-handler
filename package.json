@@ -57,7 +57,7 @@
     "@types/sinon": "^10.0.13",
     "@typescript-eslint/eslint-plugin": "^5.42.0",
     "@typescript-eslint/parser": "^5.42.0",
-    "ava": "^4.3.3",
+    "ava": "^5.1.0",
     "codecov": "^3.8.3",
     "cspell": "^6.14.1",
     "cz-conventional-changelog": "^3.3.0",
