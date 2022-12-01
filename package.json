@@ -115,6 +115,6 @@
     ]
   },
   "peerDependencies": {
-    "next": ">=9"
+    "next": ">= 9 < 14"
   }
 }
