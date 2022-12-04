@@ -149,10 +149,12 @@ export class RouterBuilder extends ExpressLikeRouter {
     this.logger.debug(`Resolved ${list.length} ${method} middleware list`);
 
     return list.map(async (middleware) => {
-      const middlewareValue = await Promise.resolve(middleware(req, res));
+      const middlewareValue = await middleware(req, res);
 
-      for (const middlewareKey of Object.keys(middlewareValue)) {
-        req.middleware[middlewareKey] = middlewareValue[middlewareKey];
+      if (middlewareValue) {
+        for (const middlewareKey of Object.keys(middlewareValue)) {
+          req.middleware[middlewareKey] = middlewareValue[middlewareKey];
+        }
       }
     });
   }
@@ -168,10 +170,12 @@ export class RouterBuilder extends ExpressLikeRouter {
     this.logger.debug(`Resolved ${queue.length} ${method} middleware queue`);
 
     for (const middleware of queue) {
-      const middlewareValue = await Promise.resolve(middleware(req, res));
+      const middlewareValue = await middleware(req, res);
 
-      for (const middlewareKey of Object.keys(middlewareValue)) {
-        req.middleware[middlewareKey] = middlewareValue[middlewareKey];
+      if (middlewareValue) {
+        for (const middlewareKey of Object.keys(middlewareValue)) {
+          req.middleware[middlewareKey] = middlewareValue[middlewareKey];
+        }
       }
     }
   }

@@ -19,7 +19,7 @@ export type NextApiHandlerWithMiddleware<
 > = (
   req: NextApiRequestWithMiddleware<M>,
   res: NextApiResponse
-) => T | Promise<T>;
+) => T | Promise<T> | void;
 
 /**
  *  a standard next.js api request but with req.middleware available
