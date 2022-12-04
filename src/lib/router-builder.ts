@@ -75,12 +75,21 @@ export class RouterBuilder extends ExpressLikeRouter {
 
         const data = await handler(req as NextApiRequestWithMiddleware, res);
 
-        this.handleSendSuccessResponse(res, data);
-        this.logger.info(
-          `Successfully handled ${routerMethod} ${req.url} with ${
-            Date.now() - initiatedTime
-          }ms`
-        );
+        if (res.headersSent) {
+          this.logger.debug(
+            `Response already sent for ${routerMethod} ${req.url}`
+          );
+        } else {
+          this.logger.info(
+            `Successfully handled ${routerMethod} ${req.url} with ${
+              Date.now() - initiatedTime
+            }ms`
+          );
+          res.status(200).json({
+            success: true,
+            data,
+          });
+        }
       } catch (error) {
         this.routerOptions.error(req, res, error as Error);
         this.logger.error(
@@ -100,18 +109,6 @@ export class RouterBuilder extends ExpressLikeRouter {
           ? options.showMessage
           : process.env.NODE_ENV !== 'production'
       );
-  }
-
-  private handleSendSuccessResponse<T>(
-    res: NextApiResponse<ApiResponse<T>>,
-    data: T
-  ) {
-    if (!res.headersSent) {
-      res.status(200).json({
-        success: true,
-        data,
-      });
-    }
   }
 
   private async resolveMiddlewareListAndQueue(
