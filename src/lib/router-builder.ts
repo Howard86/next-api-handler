@@ -142,15 +142,13 @@ export class RouterBuilder extends ExpressLikeRouter {
     req: NextApiRequestWithMiddleware,
     res: NextApiResponse<ApiResponse>
   ): Promise<void>[] {
-    if (!Array.isArray(this.middlewareParallelListMap[method])) return [];
+    const list = this.middlewareParallelListMap[method];
 
-    this.logger.debug(
-      `Resolved ${
-        this.middlewareParallelListMap[method]!.length
-      } ${method} middleware list`
-    );
+    if (!Array.isArray(list)) return [];
 
-    return this.middlewareParallelListMap[method]!.map(async (middleware) => {
+    this.logger.debug(`Resolved ${list.length} ${method} middleware list`);
+
+    return list.map(async (middleware) => {
       const middlewareValue = await Promise.resolve(middleware(req, res));
 
       for (const middlewareKey of Object.keys(middlewareValue)) {
@@ -164,15 +162,12 @@ export class RouterBuilder extends ExpressLikeRouter {
     req: NextApiRequestWithMiddleware,
     res: NextApiResponse<ApiResponse>
   ): Promise<void> {
-    if (!Array.isArray(this.middlewareQueueMap[method])) return;
+    const queue = this.middlewareQueueMap[method];
+    if (!Array.isArray(queue)) return;
 
-    this.logger.debug(
-      `Resolved ${
-        this.middlewareQueueMap[method]!.length
-      } ${method} middleware queue`
-    );
+    this.logger.debug(`Resolved ${queue.length} ${method} middleware queue`);
 
-    for (const middleware of this.middlewareQueueMap[method]!) {
+    for (const middleware of queue) {
       const middlewareValue = await Promise.resolve(middleware(req, res));
 
       for (const middlewareKey of Object.keys(middlewareValue)) {
