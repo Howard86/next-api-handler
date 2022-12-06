@@ -39,7 +39,7 @@ export abstract class ExpressLikeRouter {
 
   private addMiddleware(middlewareMap: InternalMiddlewareMap) {
     return (<
-      T extends TypedObject = TypedObject,
+      T extends TypedObject | void = TypedObject,
       M extends TypedObject = TypedObject
     >(
       methodOrHandler:

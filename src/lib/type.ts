@@ -59,7 +59,7 @@ export type InternalMiddlewareMap = Partial<
   Record<
     MiddlewareRouterMethod,
     NextApiHandlerWithMiddleware<
-      TypedObject,
+      TypedObject | void,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       any
     >[]
@@ -82,11 +82,17 @@ export type MiddlewareRouterMethod =
   | RouterMethod;
 
 export type AddMiddleware<R> = {
-  <T extends TypedObject = TypedObject, M extends TypedObject = TypedObject>(
+  <
+    T extends TypedObject | void = TypedObject,
+    M extends TypedObject = TypedObject
+  >(
     method: MiddlewareRouterMethod,
     handler: NextApiHandlerWithMiddleware<T, M>
   ): R;
-  <T extends TypedObject = TypedObject, M extends TypedObject = TypedObject>(
+  <
+    T extends TypedObject | void = TypedObject,
+    M extends TypedObject = TypedObject
+  >(
     handler: NextApiHandlerWithMiddleware<T, M>
   ): R;
 };
