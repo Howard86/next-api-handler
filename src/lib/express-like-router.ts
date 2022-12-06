@@ -39,7 +39,7 @@ export abstract class ExpressLikeRouter {
 
   private addMiddleware(middlewareMap: InternalMiddlewareMap) {
     return (<
-      T extends TypedObject = TypedObject,
+      T extends TypedObject | void = TypedObject,
       M extends TypedObject = TypedObject
     >(
       methodOrHandler:
@@ -64,8 +64,9 @@ export abstract class ExpressLikeRouter {
     mapKey: K,
     mapValue: V
   ) {
-    if (Array.isArray(partialMap[mapKey])) {
-      partialMap[mapKey]!.push(mapValue);
+    const items = partialMap[mapKey];
+    if (Array.isArray(items)) {
+      items.push(mapValue);
     } else {
       partialMap[mapKey] = [mapValue];
     }

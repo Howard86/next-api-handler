@@ -75,12 +75,21 @@ export class RouterBuilder extends ExpressLikeRouter {
 
         const data = await handler(req as NextApiRequestWithMiddleware, res);
 
-        this.handleSendSuccessResponse(res, data);
-        this.logger.info(
-          `Successfully handled ${routerMethod} ${req.url} with ${
-            Date.now() - initiatedTime
-          }ms`
-        );
+        if (res.headersSent) {
+          this.logger.debug(
+            `Response already sent for ${routerMethod} ${req.url}`
+          );
+        } else {
+          this.logger.info(
+            `Successfully handled ${routerMethod} ${req.url} with ${
+              Date.now() - initiatedTime
+            }ms`
+          );
+          res.status(200).json({
+            success: true,
+            data,
+          });
+        }
       } catch (error) {
         this.routerOptions.error(req, res, error as Error);
         this.logger.error(
@@ -100,18 +109,6 @@ export class RouterBuilder extends ExpressLikeRouter {
           ? options.showMessage
           : process.env.NODE_ENV !== 'production'
       );
-  }
-
-  private handleSendSuccessResponse<T>(
-    res: NextApiResponse<ApiResponse<T>>,
-    data: T
-  ) {
-    if (!res.headersSent) {
-      res.status(200).json({
-        success: true,
-        data,
-      });
-    }
   }
 
   private async resolveMiddlewareListAndQueue(
@@ -142,19 +139,19 @@ export class RouterBuilder extends ExpressLikeRouter {
     req: NextApiRequestWithMiddleware,
     res: NextApiResponse<ApiResponse>
   ): Promise<void>[] {
-    if (!Array.isArray(this.middlewareParallelListMap[method])) return [];
+    const list = this.middlewareParallelListMap[method];
 
-    this.logger.debug(
-      `Resolved ${
-        this.middlewareParallelListMap[method]!.length
-      } ${method} middleware list`
-    );
+    if (!Array.isArray(list)) return [];
 
-    return this.middlewareParallelListMap[method]!.map(async (middleware) => {
-      const middlewareValue = await Promise.resolve(middleware(req, res));
+    this.logger.debug(`Resolved ${list.length} ${method} middleware list`);
 
-      for (const middlewareKey of Object.keys(middlewareValue)) {
-        req.middleware[middlewareKey] = middlewareValue[middlewareKey];
+    return list.map(async (middleware) => {
+      const middlewareValue = await middleware(req, res);
+
+      if (middlewareValue) {
+        for (const middlewareKey of Object.keys(middlewareValue)) {
+          req.middleware[middlewareKey] = middlewareValue[middlewareKey];
+        }
       }
     });
   }
@@ -164,19 +161,18 @@ export class RouterBuilder extends ExpressLikeRouter {
     req: NextApiRequestWithMiddleware,
     res: NextApiResponse<ApiResponse>
   ): Promise<void> {
-    if (!Array.isArray(this.middlewareQueueMap[method])) return;
+    const queue = this.middlewareQueueMap[method];
+    if (!Array.isArray(queue)) return;
 
-    this.logger.debug(
-      `Resolved ${
-        this.middlewareQueueMap[method]!.length
-      } ${method} middleware queue`
-    );
+    this.logger.debug(`Resolved ${queue.length} ${method} middleware queue`);
 
-    for (const middleware of this.middlewareQueueMap[method]!) {
-      const middlewareValue = await Promise.resolve(middleware(req, res));
+    for (const middleware of queue) {
+      const middlewareValue = await middleware(req, res);
 
-      for (const middlewareKey of Object.keys(middlewareValue)) {
-        req.middleware[middlewareKey] = middlewareValue[middlewareKey];
+      if (middlewareValue) {
+        for (const middlewareKey of Object.keys(middlewareValue)) {
+          req.middleware[middlewareKey] = middlewareValue[middlewareKey];
+        }
       }
     }
   }

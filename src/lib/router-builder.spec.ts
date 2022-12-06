@@ -238,6 +238,38 @@ type FakeUser = {
   };
 };
 
+test.serial('should accept middleware when returning void', async (t) => {
+  router.get((req) => req.middleware);
+  const handler = router.build();
+
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  const emptyMiddleware = () => {};
+  router.use(emptyMiddleware);
+
+  await handler({ method: 'GET' } as NextApiRequestWithMiddleware, res);
+  t.true(spiedStatus.calledOnceWithExactly(200));
+  t.true(
+    spiedJson.calledOnceWithExactly({
+      success: true,
+      data: {},
+    })
+  );
+
+  spiedStatus.resetHistory();
+  spiedJson.resetHistory();
+
+  router.inject(emptyMiddleware);
+
+  await handler({ method: 'GET' } as NextApiRequestWithMiddleware, res);
+  t.true(spiedStatus.calledOnceWithExactly(200));
+  t.true(
+    spiedJson.calledOnceWithExactly({
+      success: true,
+      data: {},
+    })
+  );
+});
+
 test.serial(
   'should accept middleware in sequence and receive values from request',
   async (t) => {
