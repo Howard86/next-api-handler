@@ -31,7 +31,7 @@
   "ignorePaths": [
     "package.json",
     "package-lock.json",
-    "yarn.lock",
+    "pnpm-lock.yaml",
     "tsconfig.json",
     "node_modules/**"
   ]

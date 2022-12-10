@@ -43,7 +43,7 @@
     "doc:json": "typedoc src/ --exclude **/*.spec.ts --json build/docs/typedoc.json",
     "doc:publish": "gh-pages -m \"[ci skip] Updates\" -d build/docs",
     "release": "standard-version",
-    "reset-hard": "git clean -dfx && git reset --hard && yarn",
+    "reset-hard": "git clean -dfx && git reset --hard && pnpm i",
     "prepare-release": "run-s reset-hard test cov:check doc:html doc:publish"
   },
   "engines": {
