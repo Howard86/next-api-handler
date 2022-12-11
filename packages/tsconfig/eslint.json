@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "ESlint",
+  "extends": "./base.json",
+  "compilerOptions": {
+    "allowJs": true,
+    "noEmit": true
+  },
+  "include": [
+    "../../**/*.ts",
+    "../../**/*.tsx",
+    "../../**/*.js",
+    "../../**/.eslintrc.js"
+  ],
+  "exclude": ["node_modules", "build", "dist", ".next", ".turbo"]
+}
