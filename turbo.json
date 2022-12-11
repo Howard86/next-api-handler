@@ -9,7 +9,29 @@
     "lint": {
       "outputs": []
     },
+    "test": {
+      "outputs": [],
+      "dependsOn": ["^build"]
+    },
+    "start": {
+      "dependsOn": ["^build"]
+    },
+    "cov": {
+      "outputs": [".nyc_output/**", "coveraoge"],
+      "dependsOn": []
+    },
+    "cov:send": {
+      "dependsOn": ["^test"],
+      "cache": false
+    },
+    "cov:check": {
+      "dependsOn": ["^test"],
+      "outputs": []
+    },
     "dev": {
+      "cache": false
+    },
+    "clean": {
       "cache": false
     }
   }

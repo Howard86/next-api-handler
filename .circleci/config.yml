@@ -11,36 +11,78 @@ jobs:
   'node-14':
     docker:
       - image: cimg/node:14.17
+    resource_class: large
+    parallelism: 10
+
     steps:
       - checkout
       - restore_cache:
+          name: Restore pnpm Package Cache
           keys:
-            - v1-dependencies-{{ checksum "yarn.lock" }}
-      - run: yarn install
+            - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+      - run:
+          name: Install pnpm package manager
+          command: |
+            curl -L https://pnpm.js.org/pnpm.js | node - add --global pnpm@7
+      - run:
+          name: Install Dependencies
+          command: pnpm install --frozen-lockfile=false
+
       - save_cache:
+          name: Save pnpm Package Cache
+          key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
           paths:
             - node_modules
-          key: v1-dependencies-{{ checksum "yarn.lock" }}
-      - run: yarn test
-      - run: yarn cov:send
-      - run: yarn cov:check
+
+      - run:
+          name: Run unit test
+          command: pnpm test
+
+      - run:
+          name: Send coverage result to Codecov
+          command: pnpm turbo run cov:send
+
+      - run:
+          name: Verify coverages are meeting standards
+          command: pnpm turbo run cov:check
+
   'node-lts':
     docker:
       - image: cimg/node:lts
+    resource_class: large
+    parallelism: 10
+
     steps:
       - checkout
       - restore_cache:
+          name: Restore pnpm Package Cache
           keys:
-            - v1-dependencies-{{ checksum "yarn.lock" }}
-            - v1-dependencies-
-      - run: yarn install
+            - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+      - run:
+          name: Install pnpm package manager
+          command: |
+            curl -L https://pnpm.js.org/pnpm.js | node - add --global pnpm@7
+      - run:
+          name: Install Dependencies
+          command: pnpm install --frozen-lockfile=false
+
       - save_cache:
+          name: Save pnpm Package Cache
+          key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
           paths:
             - node_modules
-          key: v1-dependencies-{{ checksum "yarn.lock" }}
-      - run: yarn test
-      - run: yarn cov:send
-      - run: yarn cov:check
+
+      - run:
+          name: Run unit test
+          command: pnpm test
+
+      - run:
+          name: Send coverage result to Codecov
+          command: pnpm turbo run cov:send
+
+      - run:
+          name: Verify coverages are meeting standards
+          command: pnpm turbo run cov:check
 
 workflows:
   version: 2
@@ -50,10 +92,8 @@ workflows:
       - 'node-lts'
       - cypress/run:
           executor: cypress-node
-          working_directory: example
-          yarn: true
           record: true
           tags: circleci
-          build: yarn build
-          start: yarn start
-          install-command: yarn install --frozen-lockfile
+          build: pnpm turbo run build
+          start: pnpm turbo run start
+          install-command: pnpm install --frozen-lockfile=false
