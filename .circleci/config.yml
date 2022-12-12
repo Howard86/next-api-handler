@@ -22,8 +22,8 @@ jobs:
             - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
       - run:
           name: Install pnpm package manager
-          command: |
-            curl -L https://pnpm.js.org/pnpm.js | node - add --global pnpm@7
+          command: npm i -g pnpm
+
       - run:
           name: Install Dependencies
           command: pnpm install --frozen-lockfile=false
@@ -60,8 +60,8 @@ jobs:
             - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
       - run:
           name: Install pnpm package manager
-          command: |
-            curl -L https://pnpm.js.org/pnpm.js | node - add --global pnpm@7
+          command: npm i -g pnpm
+
       - run:
           name: Install Dependencies
           command: pnpm install --frozen-lockfile=false
@@ -96,4 +96,4 @@ workflows:
           tags: circleci
           build: pnpm turbo run build
           start: pnpm turbo run start
-          install-command: pnpm install --frozen-lockfile=false
+          install-command: npm i -g pnpm && pnpm install --frozen-lockfile=false
