@@ -84,7 +84,6 @@
     "README.md"
   ],
   "ava": {
-    "failFast": true,
     "timeout": "60s",
     "typescript": {
       "rewritePaths": {
