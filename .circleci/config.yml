@@ -38,15 +38,15 @@ jobs:
 
       - run:
           name: Run unit test
-          command: pnpm test
+          command: pnpm turbo run test --filter=next-api-handler
 
       - run:
           name: Send coverage result to Codecov
-          command: pnpm turbo run cov:send
+          command: pnpm turbo run cov:send --filter=next-api-handler
 
       - run:
           name: Verify coverages are meeting standards
-          command: pnpm turbo run cov:check
+          command: pnpm turbo run cov:check --filter=next-api-handler
 
 workflows:
   version: 2
@@ -55,9 +55,9 @@ workflows:
       - 'node-16'
       - cypress/run:
           executor: cypress-node
-          working_directory: .
+          working_directory: apps/example
           record: true
           tags: circleci
-          build: pnpm turbo run build --filter=example
-          start: pnpm turbo run start --filter=example
+          build: cd ../.. && pnpm turbo run build --filter=example
+          start: cd ../.. && pnpm turbo run start --filter=example
           install-command: npm i -g pnpm && pnpm install --frozen-lockfile=false
