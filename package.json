@@ -1,120 +1,36 @@
 {
-  "name": "next-api-handler",
-  "version": "0.4.3",
+  "name": "next-api-handler-monorepo",
+  "version": "0.0.0",
+  "engine": {
+    "node": ">=16"
+  },
   "description": "lightweight nextjs api handler wrapper, portable & configurable for serverless environment",
-  "main": "build/main/index.js",
-  "typings": "build/main/index.d.ts",
-  "module": "build/module/index.js",
   "repository": "https://github.com/Howard86/next-api-handler",
-  "license": "MIT",
-  "keywords": [
-    "next",
-    "api",
-    "restful",
-    "middleware",
-    "express",
-    "serverless"
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
   ],
   "scripts": {
-    "build": "run-p build:*",
-    "build:main": "tsc -p tsconfig.json",
-    "build:module": "tsc -p tsconfig.module.json",
-    "fix": "run-s fix:*",
-    "fix:prettier": "prettier \"src/**/*.ts\" --write",
-    "fix:lint": "eslint src --ext .ts --fix",
-    "test": "run-s build test:*",
-    "test:lint": "eslint src --ext .ts",
-    "test:prettier": "prettier \"src/**/*.ts\" --list-different",
-    "test:spelling": "cspell \"{README.md,.github/*.md,src/**/*.ts}\"",
-    "test:unit": "nyc --silent ava",
-    "check-cli": "run-s test diff-integration-tests check-integration-tests",
-    "check-integration-tests": "run-s check-integration-test:*",
-    "diff-integration-tests": "mkdir -p diff && rm -rf diff/test && cp -r test diff/test && rm -rf diff/test/test-*/.git && cd diff && git init --quiet && git add -A && git commit --quiet --no-verify --allow-empty -m 'WIP' && echo '\\n\\nCommitted most recent integration test output in the \"diff\" directory. Review the changes with \"cd diff && git diff HEAD\" or your preferred git diff viewer.'",
-    "watch": "run-p watch:*",
-    "watch:build": "tsc -p tsconfig.json -w",
-    "watch:test": "nyc --silent ava --watch",
-    "cov": "run-s build test:unit cov:html cov:lcov && open-cli coverage/index.html",
-    "cov:html": "nyc report --reporter=html",
-    "cov:lcov": "nyc report --reporter=lcov",
-    "cov:send": "run-s cov:lcov && codecov",
-    "cov:check": "nyc report && nyc check-coverage --lines 100 --functions 100 --branches 100",
-    "doc": "run-s doc:html && open-cli build/docs/index.html",
-    "doc:html": "typedoc src/ --exclude **/*.spec.ts --out build/docs",
-    "doc:json": "typedoc src/ --exclude **/*.spec.ts --json build/docs/typedoc.json",
-    "doc:publish": "gh-pages -m \"[ci skip] Updates\" -d build/docs",
-    "release": "standard-version",
-    "reset-hard": "git clean -dfx && git reset --hard && yarn",
-    "prepare-release": "run-s reset-hard test cov:check doc:html doc:publish"
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "clean": "turbo run clean && rm -rf node_modules"
   },
   "engines": {
     "node": ">=14"
   },
-  "dependencies": {},
   "devDependencies": {
-    "@ava/typescript": "^3.0.1",
-    "@istanbuljs/nyc-config-typescript": "^1.0.2",
-    "@types/node": "^18.11.9",
-    "@types/sinon": "^10.0.13",
-    "@typescript-eslint/eslint-plugin": "^5.42.0",
-    "@typescript-eslint/parser": "^5.42.0",
-    "ava": "^4.3.3",
-    "codecov": "^3.8.3",
-    "cspell": "^6.14.1",
-    "cz-conventional-changelog": "^3.3.0",
-    "eslint": "^8.27.0",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-eslint-comments": "^3.2.0",
-    "eslint-plugin-functional": "^4.4.1",
-    "eslint-plugin-import": "^2.26.0",
+    "cspell": "^6.17.0",
+    "cypress": "^10.7.0",
+    "eslint": "^8.29.0",
     "gh-pages": "^4.0.0",
-    "next": "^12.3.4",
     "npm-run-all": "^4.1.5",
     "nyc": "^15.1.0",
-    "open-cli": "^7.1.0",
     "prettier": "^2.7.1",
-    "sinon": "^14.0.2",
-    "standard-version": "^9.5.0",
-    "ts-node": "^10.9.1",
-    "typedoc": "^0.23.20",
-    "typescript": "^4.9.3"
-  },
-  "files": [
-    "build/main",
-    "build/module",
-    "!**/*.spec.*",
-    "!**/*.json",
-    "LICENSE",
-    "README.md"
-  ],
-  "ava": {
-    "failFast": true,
-    "timeout": "60s",
-    "typescript": {
-      "rewritePaths": {
-        "src/": "build/main/"
-      },
-      "compile": false
-    },
-    "files": [
-      "!build/module/**",
-      "!example/**"
-    ]
-  },
-  "config": {
-    "commitizen": {
-      "path": "cz-conventional-changelog"
-    }
-  },
-  "prettier": {
-    "singleQuote": true
-  },
-  "nyc": {
-    "extends": "@istanbuljs/nyc-config-typescript",
-    "exclude": [
-      "**/*.spec.js"
-    ]
-  },
-  "peerDependencies": {
-    "next": ">=9"
+    "turbo": "^1.6.3",
+    "typescript": "^4.9.5"
   }
 }

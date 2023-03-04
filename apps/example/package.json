@@ -1,26 +1,31 @@
 {
+  "name": "example",
+  "version": "0.0.0",
   "private": true,
   "scripts": {
+    "clean": "rm -rf .turbo node_modules .next",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "lint": "TIMING=1 next lint",
     "cypress": "cypress open",
     "cypress:headless": "cypress run",
     "e2e": "start-server-and-test start http://localhost:3000 cypress",
-    "e2e:headless": "start-server-and-test start http://localhost:3000 cypress:headless",
-    "preinstall": "cd .. && yarn install && yarn build"
+    "e2e:headless": "start-server-and-test start http://localhost:3000 cypress:headless"
   },
   "dependencies": {
     "next": "^12.2.5",
-    "next-api-handler": "link:./..",
+    "next-api-handler": "workspace:*",
     "react": "^17",
     "react-dom": "^17"
   },
   "devDependencies": {
+    "eslint-config-custom": "workspace:*",
     "@types/node": "^18.7.15",
     "@types/react": "^17",
     "cypress": "^10.7.0",
     "start-server-and-test": "^1.14.0",
+    "tsconfig": "workspace:*",
     "typescript": "^4.8.2"
   }
 }

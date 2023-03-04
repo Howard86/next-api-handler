@@ -8,52 +8,56 @@ executors:
     docker:
       - image: 'cypress/base:16.17.0'
 jobs:
-  'node-14':
+  'node-16':
     docker:
-      - image: cimg/node:14.17
+      - image: cimg/node:16.19.1
+    resource_class: large
+    parallelism: 1
+
     steps:
       - checkout
       - restore_cache:
+          name: Restore pnpm Package Cache
           keys:
-            - v1-dependencies-{{ checksum "yarn.lock" }}
-      - run: yarn install
+            - pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
+      - run:
+          name: Install pnpm package manager
+          command: |
+            corepack enable
+            corepack prepare pnpm@latest-7 --activate
+
+      - run:
+          name: Install Dependencies
+          command: pnpm install --frozen-lockfile=false
+
       - save_cache:
+          name: Save pnpm Package Cache
+          key: pnpm-packages-{{ checksum "pnpm-lock.yaml" }}
           paths:
             - node_modules
-          key: v1-dependencies-{{ checksum "yarn.lock" }}
-      - run: yarn test
-      - run: yarn cov:send
-      - run: yarn cov:check
-  'node-lts':
-    docker:
-      - image: cimg/node:lts
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "yarn.lock" }}
-            - v1-dependencies-
-      - run: yarn install
-      - save_cache:
-          paths:
-            - node_modules
-          key: v1-dependencies-{{ checksum "yarn.lock" }}
-      - run: yarn test
-      - run: yarn cov:send
-      - run: yarn cov:check
+
+      - run:
+          name: Run unit test
+          command: pnpm turbo run test --filter=next-api-handler
+
+      - run:
+          name: Send coverage result to Codecov
+          command: pnpm turbo run cov:send --filter=next-api-handler
+
+      - run:
+          name: Verify coverages are meeting standards
+          command: pnpm turbo run cov:check --filter=next-api-handler
 
 workflows:
   version: 2
   build:
     jobs:
-      - 'node-14'
-      - 'node-lts'
+      - 'node-16'
       - cypress/run:
           executor: cypress-node
-          working_directory: example
-          yarn: true
+          working_directory: apps/example
           record: true
           tags: circleci
-          build: yarn build
-          start: yarn start
-          install-command: yarn install --frozen-lockfile
+          build: cd ../.. && pnpm turbo run build --filter=example
+          start: cd ../.. && pnpm turbo run start --filter=example
+          install-command: npm i -g pnpm && pnpm install --frozen-lockfile=false

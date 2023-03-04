@@ -1,7 +1,7 @@
 export const getDataById = (id: string) =>
   Promise.resolve(`Data with id=${id}`);
 
-export const getEmailFromCookie = (cookie: string) =>
+export const getEmailFromCookie = (cookie?: string) =>
   cookie === 'VALID_COOKIE' ? 'EMAIL' : undefined;
 
 export const getDataByEmail = (email: string) =>
