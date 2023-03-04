@@ -1,3 +1,9 @@
+# Changelog
+
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+### [0.4.4](https://github.com/Howard86/next-api-handler/compare/v0.4.3...v0.4.4) (2023-03-04)
+
 ## [0.4.3](https://github.com/Howard86/next-api-handler/compare/v0.4.2...v0.4.3) (2022-12-06)
 
 
@@ -36,6 +42,3 @@
 ### Features
 
 * accept method specific middleware, resolve [#32](https://github.com/Howard86/next-api-handler/issues/32) ([915921c](https://github.com/Howard86/next-api-handler/commit/915921c734c53a5ddce4251680c8f816f693c122))
-
-
-
