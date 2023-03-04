@@ -11,23 +11,23 @@
     },
     "test": {
       "outputs": [],
-      "dependsOn": ["^build"]
-    },
-    "start": {
-      "dependsOn": ["^build"],
-      "cache": false
+      "dependsOn": ["build"]
     },
     "cov": {
       "outputs": [".nyc_output/**", "coverage"],
-      "dependsOn": []
-    },
-    "cov:send": {
-      "dependsOn": ["^test"],
-      "cache": false
+      "dependsOn": ["build"]
     },
     "cov:check": {
-      "dependsOn": ["^test"],
+      "dependsOn": ["test"],
       "outputs": []
+    },
+    "cov:send": {
+      "dependsOn": ["test"],
+      "cache": false
+    },
+    "start": {
+      "dependsOn": ["build"],
+      "cache": false
     },
     "dev": {
       "cache": false

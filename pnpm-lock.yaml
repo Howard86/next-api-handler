@@ -4,15 +4,25 @@ importers:
 
   .:
     specifiers:
-      cspell: ^6.14.1
+      cspell: ^6.17.0
+      cypress: ^10.7.0
       eslint: ^8.29.0
+      gh-pages: ^4.0.0
+      npm-run-all: ^4.1.5
+      nyc: ^15.1.0
       prettier: ^2.7.1
       turbo: ^1.6.3
+      typescript: ^4.9.5
     devDependencies:
       cspell: 6.17.0
+      cypress: 10.11.0
       eslint: 8.29.0
+      gh-pages: 4.0.0
+      npm-run-all: 4.1.5
+      nyc: 15.1.0
       prettier: 2.7.1
       turbo: 1.6.3
+      typescript: 4.9.5
 
   apps/example:
     specifiers:
@@ -6594,6 +6604,12 @@ packages:
     resolution: {integrity: sha512-Uz+dTXYzxXXbsFpM86Wh3dKCxrQqUcVMxwU54orwlJjOpO3ao8L7j5lH+dWfTwgCwIuM9GQ2kvVotzYJMXTBZg==}
     engines: {node: '>=4.2.0'}
     hasBin: true
+
+  /typescript/4.9.5:
+    resolution: {integrity: sha512-1FXk9E2Hm+QzZQ7z+McJiHL4NW1F2EzMu9Nq9i3zAaGqibafqYwCVU6WyWAuyQRRzOlxou8xZSyXLEN8oKj24g==}
+    engines: {node: '>=4.2.0'}
+    hasBin: true
+    dev: true
 
   /uglify-js/3.17.4:
     resolution: {integrity: sha512-T9q82TJI9e/C1TAxYvfb16xO120tMVFZrGA3f9/P4424DNu6ypK103y0GPFVa17yotwSyZW5iYXgjYHkGrJW/g==}
