@@ -14,10 +14,11 @@
       "dependsOn": ["^build"]
     },
     "start": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "cache": false
     },
     "cov": {
-      "outputs": [".nyc_output/**", "coveraoge"],
+      "outputs": [".nyc_output/**", "coverage"],
       "dependsOn": []
     },
     "cov:send": {
