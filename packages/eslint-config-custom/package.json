@@ -7,12 +7,13 @@
   "dependencies": {
     "eslint": "^7.23.0",
     "eslint-config-next": "^13.0.0",
-    "eslint-plugin-react": "^7.31.8",
-    "eslint-config-turbo": "^0.0.7",
     "eslint-config-prettier": "^8.5.0",
+    "eslint-config-turbo": "^0.0.7",
     "eslint-plugin-eslint-comments": "^3.2.0",
     "eslint-plugin-functional": "^4.4.1",
-    "eslint-plugin-import": "^2.26.0"
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-jest": "^27.2.1",
+    "eslint-plugin-react": "^7.31.8"
   },
   "devDependencies": {
     "typescript": "^4.7.4"
