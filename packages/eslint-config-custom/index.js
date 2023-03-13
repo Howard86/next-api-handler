@@ -36,4 +36,11 @@ module.exports = {
       { ignoreDeclarationSort: true, ignoreCase: true },
     ],
   },
+  overrides: [
+    {
+      files: ['**/*.spec.ts', '**/*.spec.tsx'],
+      plugins: ['jest'],
+      extends: ['plugin:jest/recommended'],
+    },
+  ],
 };

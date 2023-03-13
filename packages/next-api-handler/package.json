@@ -17,6 +17,8 @@
   ],
   "scripts": {
     "clean": "rm -rf .turbo node_modules build coverage .nyc_output",
+    "build-tsup": "tsup src/index.ts",
+    "test-jest": "jest src/tests",
     "build": "run-p build:*",
     "build:main": "tsc -p tsconfig.json",
     "build:module": "tsc -p tsconfig.module.json",
@@ -47,6 +49,7 @@
     "doc:publish": "gh-pages -m \"[ci skip] Updates\" -d build/docs",
     "release": "standard-version",
     "reset-hard": "git clean -dfx && git reset --hard && pnpm i",
+    "type-check": "tsc --noEmit",
     "prepare-release": "run-s reset-hard build test cov:check doc:html doc:publish"
   },
   "engines": {
