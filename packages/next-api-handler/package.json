@@ -16,10 +16,8 @@
     "serverless"
   ],
   "scripts": {
-    "clean": "rm -rf .turbo node_modules build coverage .nyc_output",
-    "build-tsup": "tsup src/index.ts",
-    "test-jest": "jest src/tests",
-    "build": "tsup src/index.ts",
+    "clean": "rm -rf .turbo node_modules build dist coverage",
+    "build": "tsup",
     "fix": "run-s fix:*",
     "fix:prettier": "prettier \"src/**/*.ts\" --write --list-different",
     "fix:lint": "eslint src --ext .ts --fix",
@@ -30,7 +28,7 @@
     "test:spelling": "cspell \"{README.md,.github/*.md,src/**/*.ts}\"",
     "test:unit": "jest --silent --coverage",
     "watch": "run-p watch:*",
-    "watch:build": "tsup --watch src/index.ts",
+    "watch:build": "tsup --watch",
     "watch:test": "jest --watch",
     "cov": "run-s cov:lcov cov:open",
     "cov:lcov": "jest --coverage --coverageReporters=lcov",
