@@ -3,7 +3,7 @@ export class HttpException extends Error {
   defaultMessage: string;
 
   constructor(
-    status: number,
+    status = 500,
     message?: string,
     defaultMessage = 'Internal Server Error'
   ) {
@@ -81,6 +81,36 @@ export class UnsupportedMediaTypeException extends HttpException {
 
 export class TooManyRequestsException extends HttpException {
   constructor(message?: string, defaultMessage = 'Too Many Requests') {
-    super(428, message, defaultMessage);
+    super(429, message, defaultMessage);
+  }
+}
+
+export class InternalServerErrorException extends HttpException {
+  constructor(message?: string, defaultMessage = 'Internal Server Error') {
+    super(500, message, defaultMessage);
+  }
+}
+
+export class NotImplementedException extends HttpException {
+  constructor(message?: string, defaultMessage = 'Not Implemented') {
+    super(501, message, defaultMessage);
+  }
+}
+
+export class BadGatewayException extends HttpException {
+  constructor(message?: string, defaultMessage = 'Bad Gateway') {
+    super(502, message, defaultMessage);
+  }
+}
+
+export class ServiceUnavailableException extends HttpException {
+  constructor(message?: string, defaultMessage = 'Service Unavailable') {
+    super(503, message, defaultMessage);
+  }
+}
+
+export class GatewayTimeoutException extends HttpException {
+  constructor(message?: string, defaultMessage = 'Gateway Timeout') {
+    super(504, message, defaultMessage);
   }
 }

@@ -1,20 +1,15 @@
 {
   "extends": "tsconfig/nextjs.json",
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx"
-  ],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
   "compilerOptions": {
     "rootDir": ".",
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "*"
-      ]
-    },
+      "@/*": ["*"],
+      // Fixes TypesCript infeered type error for pnpm morenorpos
+      // Refernce: https://github.com/microsoft/TypeScript/issues/42873
+      "next": ["node_modules/next"]
+    }
   },
-  "exclude": [
-    "node_modules"
-  ]
+  "exclude": ["node_modules"]
 }
