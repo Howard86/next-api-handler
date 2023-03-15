@@ -5,8 +5,9 @@ import { useEffect, useState } from 'react';
 
 import { Logomark } from '@/components/Logo';
 import { Navigation } from '@/components/Navigation';
+import { NavigationItem } from '@/constants/nav';
 
-function MenuIcon(props) {
+function MenuIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       aria-hidden="true"
@@ -21,7 +22,7 @@ function MenuIcon(props) {
   );
 }
 
-function CloseIcon(props) {
+function CloseIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       aria-hidden="true"
@@ -36,7 +37,11 @@ function CloseIcon(props) {
   );
 }
 
-export function MobileNavigation({ navigation }) {
+export function MobileNavigation({
+  navigation,
+}: {
+  navigation: NavigationItem[];
+}) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
 

@@ -6,9 +6,9 @@ const themes = [
   { name: 'Light', value: 'light', icon: LightIcon },
   { name: 'Dark', value: 'dark', icon: DarkIcon },
   { name: 'System', value: 'system', icon: SystemIcon },
-];
+] as const;
 
-function LightIcon(props) {
+function LightIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg aria-hidden="true" viewBox="0 0 16 16" {...props}>
       <path
@@ -20,7 +20,7 @@ function LightIcon(props) {
   );
 }
 
-function DarkIcon(props) {
+function DarkIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg aria-hidden="true" viewBox="0 0 16 16" {...props}>
       <path
@@ -32,7 +32,7 @@ function DarkIcon(props) {
   );
 }
 
-function SystemIcon(props) {
+function SystemIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg aria-hidden="true" viewBox="0 0 16 16" {...props}>
       <path
@@ -44,8 +44,8 @@ function SystemIcon(props) {
   );
 }
 
-export function ThemeSelector(props) {
-  const [selectedTheme, setSelectedTheme] = useState();
+export function ThemeSelector(props: React.ComponentProps<typeof Listbox>) {
+  const [selectedTheme, setSelectedTheme] = useState<(typeof themes)[number]>();
 
   useEffect(() => {
     if (selectedTheme) {

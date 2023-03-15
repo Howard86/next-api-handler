@@ -7,9 +7,6 @@ const nextConfig = {
   experimental: {
     scrollRestoration: true,
   },
-  typescript: {
-    ignoreBuildErrors: true,
-  },
 };
 
 export default withMarkdoc()(nextConfig);

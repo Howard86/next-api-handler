@@ -1,6 +1,6 @@
 import clsx from 'clsx';
 
-import { Icon } from '@/components/Icon';
+import { Icon, IconProps } from '@/components/Icon';
 
 const styles = {
   note: {
@@ -15,14 +15,22 @@ const styles = {
     title: 'text-amber-900 dark:text-amber-500',
     body: 'text-amber-800 [--tw-prose-underline:theme(colors.amber.400)] [--tw-prose-background:theme(colors.amber.50)] prose-a:text-amber-900 prose-code:text-amber-900 dark:text-slate-300 dark:[--tw-prose-underline:theme(colors.sky.700)] dark:prose-code:text-slate-300',
   },
-};
+} as const;
 
 const icons = {
-  note: (props) => <Icon icon="lightbulb" {...props} />,
-  warning: (props) => <Icon icon="warning" color="amber" {...props} />,
+  note: (props: Partial<IconProps>) => <Icon icon="lightbulb" {...props} />,
+  warning: (props: Partial<IconProps>) => (
+    <Icon icon="warning" color="amber" {...props} />
+  ),
 };
 
-export function Callout({ type = 'note', title, children }) {
+interface CalloutProps {
+  type?: keyof typeof styles;
+  title: string;
+  children: React.ReactNode;
+}
+
+export function Callout({ type = 'note', title, children }: CalloutProps) {
   const IconComponent = icons[type];
 
   return (

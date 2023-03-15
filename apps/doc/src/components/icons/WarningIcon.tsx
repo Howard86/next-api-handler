@@ -1,6 +1,8 @@
+import { CustomIconProps } from './type';
+
 import { DarkMode, Gradient, LightMode } from '@/components/Icon';
 
-export function WarningIcon({ id, color }) {
+export function WarningIcon({ id, color }: CustomIconProps) {
   return (
     <>
       <defs>

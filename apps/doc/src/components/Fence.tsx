@@ -1,7 +1,12 @@
-import Highlight, { defaultProps } from 'prism-react-renderer';
+import Highlight, { defaultProps, Language } from 'prism-react-renderer';
 import { Fragment } from 'react';
 
-export function Fence({ children, language }) {
+interface FenceProps {
+  children: string;
+  language: Language;
+}
+
+export function Fence({ children, language }: FenceProps) {
   return (
     <Highlight
       {...defaultProps}

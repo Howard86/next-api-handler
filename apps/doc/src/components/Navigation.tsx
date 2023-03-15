@@ -2,7 +2,13 @@ import clsx from 'clsx';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
-export function Navigation({ navigation, className }) {
+import { NavigationItem } from '@/constants/nav';
+
+interface NavigationProps extends React.HTMLAttributes<HTMLDivElement> {
+  navigation: NavigationItem[];
+}
+
+export function Navigation({ navigation, className }: NavigationProps) {
   const router = useRouter();
 
   return (

@@ -15,15 +15,22 @@ const icons = {
   theming: ThemingIcon,
   lightbulb: LightbulbIcon,
   warning: WarningIcon,
-};
+} as const;
+
+export type IconType = keyof typeof icons;
 
 const iconStyles = {
   blue: '[--icon-foreground:theme(colors.slate.900)] [--icon-background:theme(colors.white)]',
   amber:
     '[--icon-foreground:theme(colors.amber.900)] [--icon-background:theme(colors.amber.100)]',
-};
+} as const;
 
-export function Icon({ color = 'blue', icon, className, ...props }) {
+export interface IconProps extends React.SVGProps<SVGSVGElement> {
+  icon: IconType;
+  color?: keyof typeof iconStyles;
+}
+
+export function Icon({ color = 'blue', icon, className, ...props }: IconProps) {
   const id = useId();
   const IconComponent = icons[icon];
 
@@ -52,7 +59,12 @@ const gradients = {
   ],
 };
 
-export function Gradient({ color = 'blue', ...props }) {
+export interface GradientProps
+  extends React.SVGProps<SVGRadialGradientElement> {
+  color?: keyof typeof gradients;
+}
+
+export function Gradient({ color = 'blue', ...props }: GradientProps) {
   return (
     <radialGradient
       cx={0}
@@ -68,10 +80,12 @@ export function Gradient({ color = 'blue', ...props }) {
   );
 }
 
-export function LightMode({ className, ...props }) {
+export type ModeProps = React.SVGProps<SVGGElement>;
+
+export function LightMode({ className, ...props }: ModeProps) {
   return <g className={clsx('dark:hidden', className)} {...props} />;
 }
 
-export function DarkMode({ className, ...props }) {
+export function DarkMode({ className, ...props }: ModeProps) {
   return <g className={clsx('hidden dark:inline', className)} {...props} />;
 }

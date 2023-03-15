@@ -1,6 +1,15 @@
 import clsx from 'clsx';
 
-export function Prose({ as: Component = 'div', className, ...props }) {
+interface ProseProps extends React.HTMLAttributes<HTMLDivElement> {
+  as?: React.ElementType;
+  className?: string;
+}
+
+export function Prose({
+  as: Component = 'div',
+  className,
+  ...props
+}: ProseProps) {
   return (
     <Component
       className={clsx(

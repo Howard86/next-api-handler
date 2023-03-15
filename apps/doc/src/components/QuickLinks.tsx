@@ -1,8 +1,8 @@
 import Link from 'next/link';
 
-import { Icon } from '@/components/Icon';
+import { Icon, IconType } from '@/components/Icon';
 
-export function QuickLinks({ children }) {
+export function QuickLinks({ children }: { children: React.ReactNode }) {
   return (
     <div className="not-prose my-12 grid grid-cols-1 gap-6 sm:grid-cols-2">
       {children}
@@ -10,7 +10,14 @@ export function QuickLinks({ children }) {
   );
 }
 
-export function QuickLink({ title, description, href, icon }) {
+interface QuickLinkProps {
+  title: string;
+  description: string;
+  href: string;
+  icon: IconType;
+}
+
+export function QuickLink({ title, description, href, icon }: QuickLinkProps) {
   return (
     <div className="group relative rounded-xl border border-slate-200 dark:border-slate-800">
       <div className="absolute -inset-px rounded-xl border-2 border-transparent opacity-0 [background:linear-gradient(var(--quick-links-hover-bg,theme(colors.sky.50)),var(--quick-links-hover-bg,theme(colors.sky.50)))_padding-box,linear-gradient(to_top,theme(colors.indigo.400),theme(colors.cyan.400),theme(colors.sky.500))_border-box] group-hover:opacity-100 dark:[--quick-links-hover-bg:theme(colors.slate.800)]" />

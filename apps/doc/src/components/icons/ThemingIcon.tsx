@@ -1,6 +1,8 @@
+import { CustomIconProps } from './type';
+
 import { DarkMode, Gradient, LightMode } from '@/components/Icon';
 
-export function ThemingIcon({ id, color }) {
+export function ThemingIcon({ id, color }: CustomIconProps) {
   return (
     <>
       <defs>
