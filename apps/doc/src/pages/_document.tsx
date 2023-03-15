@@ -1,4 +1,4 @@
-import { Head, Html, Main, NextScript } from 'next/document'
+import { Head, Html, Main, NextScript } from 'next/document';
 
 const themeScript = `
   let isDarkMode = window.matchMedia('(prefers-color-scheme: dark)')
@@ -36,7 +36,7 @@ const themeScript = `
   }).observe(document.documentElement, { attributeFilter: ['data-theme'], attributeOldValue: true })
 
   isDarkMode.addEventListener('change', () => updateThemeWithoutTransitions())
-`
+`;
 
 export default function Document() {
   return (
@@ -49,5 +49,5 @@ export default function Document() {
         <NextScript />
       </body>
     </Html>
-  )
+  );
 }

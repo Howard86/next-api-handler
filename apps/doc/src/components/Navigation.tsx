@@ -1,9 +1,9 @@
-import Link from 'next/link'
-import { useRouter } from 'next/router'
-import clsx from 'clsx'
+import clsx from 'clsx';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 
 export function Navigation({ navigation, className }) {
-  let router = useRouter()
+  const router = useRouter();
 
   return (
     <nav className={clsx('text-base lg:text-sm', className)}>
@@ -37,5 +37,5 @@ export function Navigation({ navigation, className }) {
         ))}
       </ul>
     </nav>
-  )
+  );
 }

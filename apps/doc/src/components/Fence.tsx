@@ -1,5 +1,5 @@
-import { Fragment } from 'react'
-import Highlight, { defaultProps } from 'prism-react-renderer'
+import Highlight, { defaultProps } from 'prism-react-renderer';
+import { Fragment } from 'react';
 
 export function Fence({ children, language }) {
   return (
@@ -26,5 +26,5 @@ export function Fence({ children, language }) {
         </pre>
       )}
     </Highlight>
-  )
+  );
 }

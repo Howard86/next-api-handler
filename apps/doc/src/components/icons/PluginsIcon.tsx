@@ -1,4 +1,4 @@
-import { DarkMode, Gradient, LightMode } from '@/components/Icon'
+import { DarkMode, Gradient, LightMode } from '@/components/Icon';
 
 export function PluginsIcon({ id, color }) {
   return (
@@ -59,5 +59,5 @@ export function PluginsIcon({ id, color }) {
         />
       </DarkMode>
     </>
-  )
+  );
 }

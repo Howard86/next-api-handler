@@ -4,7 +4,12 @@
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["build/**", ".next/**"],
-      "env": ["NODE_ENV"]
+      "env": [
+        "NODE_ENV",
+        "NEXT_PUBLIC_DOCSEARCH_APP_ID",
+        "NEXT_PUBLIC_DOCSEARCH_API_KEY",
+        "NEXT_PUBLIC_DOCSEARCH_INDEX_NAME"
+      ]
     },
     "lint": {
       "outputs": []

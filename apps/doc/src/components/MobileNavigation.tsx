@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/router'
-import { Dialog } from '@headlessui/react'
+import { Dialog } from '@headlessui/react';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
 
-import { Logomark } from '@/components/Logo'
-import { Navigation } from '@/components/Navigation'
+import { Logomark } from '@/components/Logo';
+import { Navigation } from '@/components/Navigation';
 
 function MenuIcon(props) {
   return (
@@ -18,7 +18,7 @@ function MenuIcon(props) {
     >
       <path d="M4 7h16M4 12h16M4 17h16" />
     </svg>
-  )
+  );
 }
 
 function CloseIcon(props) {
@@ -33,28 +33,28 @@ function CloseIcon(props) {
     >
       <path d="M5 5l14 14M19 5l-14 14" />
     </svg>
-  )
+  );
 }
 
 export function MobileNavigation({ navigation }) {
-  let router = useRouter()
-  let [isOpen, setIsOpen] = useState(false)
+  const router = useRouter();
+  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    if (!isOpen) return
+    if (!isOpen) return;
 
     function onRouteChange() {
-      setIsOpen(false)
+      setIsOpen(false);
     }
 
-    router.events.on('routeChangeComplete', onRouteChange)
-    router.events.on('routeChangeError', onRouteChange)
+    router.events.on('routeChangeComplete', onRouteChange);
+    router.events.on('routeChangeError', onRouteChange);
 
     return () => {
-      router.events.off('routeChangeComplete', onRouteChange)
-      router.events.off('routeChangeError', onRouteChange)
-    }
-  }, [router, isOpen])
+      router.events.off('routeChangeComplete', onRouteChange);
+      router.events.off('routeChangeError', onRouteChange);
+    };
+  }, [router, isOpen]);
 
   return (
     <>
@@ -89,5 +89,5 @@ export function MobileNavigation({ navigation }) {
         </Dialog.Panel>
       </Dialog>
     </>
-  )
+  );
 }

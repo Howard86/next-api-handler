@@ -1,26 +1,26 @@
-import { Fragment } from 'react'
-import Image from 'next/image'
-import clsx from 'clsx'
-import Highlight, { defaultProps } from 'prism-react-renderer'
+import clsx from 'clsx';
+import Image from 'next/image';
+import Highlight, { defaultProps } from 'prism-react-renderer';
+import { Fragment } from 'react';
 
-import { Button } from '@/components/Button'
-import { HeroBackground } from '@/components/HeroBackground'
-import blurCyanImage from '@/images/blur-cyan.png'
-import blurIndigoImage from '@/images/blur-indigo.png'
+import { Button } from '@/components/Button';
+import { HeroBackground } from '@/components/HeroBackground';
+import blurCyanImage from '@/images/blur-cyan.png';
+import blurIndigoImage from '@/images/blur-indigo.png';
 
-const codeLanguage = 'javascript'
+const codeLanguage = 'javascript';
 const code = `export default {
   strategy: 'predictive',
   engine: {
     cpus: 12,
     backups: ['./storage/cache.wtf'],
   },
-}`
+}`;
 
 const tabs = [
   { name: 'cache-advance.config.js', isActive: true },
   { name: 'package.json', isActive: false },
-]
+];
 
 function TrafficLightsIcon(props) {
   return (
@@ -29,7 +29,7 @@ function TrafficLightsIcon(props) {
       <circle cx="21" cy="5" r="4.5" />
       <circle cx="37" cy="5" r="4.5" />
     </svg>
-  )
+  );
 }
 
 export function Hero() {
@@ -172,5 +172,5 @@ export function Hero() {
         </div>
       </div>
     </div>
-  )
+  );
 }

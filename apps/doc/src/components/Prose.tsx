@@ -1,4 +1,4 @@
-import clsx from 'clsx'
+import clsx from 'clsx';
 
 export function Prose({ as: Component = 'div', className, ...props }) {
   return (
@@ -21,5 +21,5 @@ export function Prose({ as: Component = 'div', className, ...props }) {
       )}
       {...props}
     />
-  )
+  );
 }

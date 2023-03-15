@@ -1,4 +1,4 @@
-import { DarkMode, Gradient, LightMode } from '@/components/Icon'
+import { DarkMode, Gradient, LightMode } from '@/components/Icon';
 
 export function ThemingIcon({ id, color }) {
   return (
@@ -55,5 +55,5 @@ export function ThemingIcon({ id, color }) {
         />
       </DarkMode>
     </>
-  )
+  );
 }
