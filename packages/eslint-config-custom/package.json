@@ -5,6 +5,8 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.55.0",
+    "@typescript-eslint/parser": "^5.55.0",
     "eslint": "^7.23.0",
     "eslint-config-next": "^13.0.0",
     "eslint-config-prettier": "^8.5.0",
