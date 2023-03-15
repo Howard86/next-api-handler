@@ -5,6 +5,8 @@
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "module": "dist/index.js",
+  "type": "module",
+  "sideEffects": false,
   "repository": "https://github.com/Howard86/next-api-handler",
   "license": "MIT",
   "keywords": [
