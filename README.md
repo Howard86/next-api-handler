@@ -112,11 +112,11 @@ export default async function handler(req, res) {
 }
 ```
 
-Please see more examples in [example](/example/pages/api) folder, can compare `/pages/api/before/*` & `/pages/api/after/*`
+Please see more examples in [example](/apps/example/pages/api) folder, can compare `/pages/api/before/*` & `/pages/api/after/*`
 
 ### More CRUD
 
-Please see examples in [before/crud/[id].ts](/example/pages/api/before/crud/[id].ts) and [after/crud/[id].ts](/example/pages/api/after/crud/[id].ts)
+Please see examples in [before/crud/[id].ts](/apps/example/pages/api/before/crud/[id].ts) and [after/crud/[id].ts](/apps/example/pages/api/after/crud/[id].ts)
 
 ### Handling HTTP Error Response
 
