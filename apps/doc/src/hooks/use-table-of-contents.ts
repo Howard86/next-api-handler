@@ -1,32 +1,28 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { TableOfContents } from '@/utils/parser';
 
-export default function useTableOfContents(
-  defaultTableOfContents: TableOfContents
-) {
-  const [currentSection, setCurrentSection] = useState(
-    defaultTableOfContents[0]?.id
-  );
+const getHeadings = (tableOfContents: TableOfContents) =>
+  tableOfContents
+    .flatMap((node) => [node.id, ...node.children.map((child) => child.id)])
+    .map((id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
 
-  const getHeadings = useCallback((tableOfContents: TableOfContents) => {
-    return tableOfContents
-      .flatMap((node) => [node.id, ...node.children.map((child) => child.id)])
-      .map((id) => {
-        const el = document.getElementById(id);
-        if (!el) return;
+      const style = window.getComputedStyle(el);
+      const scrollMt = parseFloat(style.scrollMarginTop);
 
-        const style = window.getComputedStyle(el);
-        const scrollMt = parseFloat(style.scrollMarginTop);
+      const top = window.scrollY + el.getBoundingClientRect().top - scrollMt;
+      return { id, top };
+    });
 
-        const top = window.scrollY + el.getBoundingClientRect().top - scrollMt;
-        return { id, top };
-      });
-  }, []);
+export default function useTableOfContents(tableOfContents: TableOfContents) {
+  const [currentSection, setCurrentSection] = useState(tableOfContents[0]?.id);
 
   useEffect(() => {
-    if (defaultTableOfContents.length === 0) return;
-    const headings = getHeadings(defaultTableOfContents);
+    if (tableOfContents.length === 0) return;
+
+    const headings = getHeadings(tableOfContents);
 
     function onScroll() {
       const top = window.scrollY;
@@ -45,7 +41,7 @@ export default function useTableOfContents(
     return () => {
       window.removeEventListener('scroll', onScroll);
     };
-  }, [getHeadings, defaultTableOfContents]);
+  }, [tableOfContents]);
 
   return currentSection;
 }

@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { Hero } from '@/components/Hero';
 import { Logo, Logomark } from '@/components/Logo';
@@ -11,6 +11,7 @@ import { Prose } from '@/components/Prose';
 import { Search } from '@/components/Search';
 import { ThemeSelector } from '@/components/ThemeSelector';
 import { navigation, NavigationItem } from '@/constants/nav';
+import { GITHUB_URL } from '@/constants/url';
 import useTableOfContents from '@/hooks/use-table-of-contents';
 import type { Section, TableOfContents } from '@/utils/parser';
 
@@ -63,9 +64,15 @@ function Header({ navigation }: HeaderProps) {
       </div>
       <div className="relative flex basis-0 justify-end gap-6 sm:gap-8 md:flex-grow">
         <ThemeSelector className="relative z-10" />
-        <Link href="https://github.com" className="group" aria-label="GitHub">
+        <a
+          target="_blank"
+          rel="noopener"
+          href={GITHUB_URL}
+          className="group"
+          aria-label="GitHub"
+        >
           <GitHubIcon className="h-6 w-6 fill-slate-400 group-hover:fill-slate-500 dark:group-hover:fill-slate-300" />
-        </Link>
+        </a>
       </div>
     </header>
   );
@@ -77,25 +84,33 @@ interface LayoutProps {
   tableOfContents: TableOfContents;
 }
 
+const allLinks = navigation.flatMap((section) => section.links);
+
 export function Layout({ children, title, tableOfContents }: LayoutProps) {
   const router = useRouter();
   const isHomePage = router.pathname === '/';
-  const allLinks = navigation.flatMap((section) => section.links);
-  const linkIndex = allLinks.findIndex((link) => link.href === router.pathname);
-  const previousPage = allLinks[linkIndex - 1];
-  const nextPage = allLinks[linkIndex + 1];
-  const section = navigation.find((section) =>
-    section.links.find((link) => link.href === router.pathname)
-  );
+
+  const { section, previousPage, nextPage } = useMemo(() => {
+    const linkIndex = allLinks.findIndex(
+      (link) => link.href === router.pathname
+    );
+
+    return {
+      previousPage: allLinks[linkIndex - 1],
+      nextPage: allLinks[linkIndex + 1],
+      section: navigation.find((section) =>
+        section.links.find((link) => link.href === router.pathname)
+      ),
+    };
+  }, [router.pathname]);
+
   const currentSection = useTableOfContents(tableOfContents);
 
   function isActive(section: Section) {
-    if (section.id === currentSection) {
-      return true;
-    }
-    if (!section.children) {
-      return false;
-    }
+    if (section.id === currentSection) return true;
+
+    if (!section.children) return false;
+
     return section.children.findIndex(isActive) > -1;
   }
 

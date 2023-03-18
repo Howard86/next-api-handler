@@ -9,9 +9,18 @@ const styles = {
 } as const;
 
 type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement>;
+type DefaultLinkProps = Omit<
+  React.AnchorHTMLAttributes<HTMLAnchorElement>,
+  'href'
+>;
 
-type ButtonOrLinkProps<T extends boolean> = T extends true
-  ? ButtonProps & LinkProps
+type ButtonOrLinkProps<
+  IsLink extends boolean,
+  IsExternal extends boolean = false
+> = IsLink extends true
+  ? IsExternal extends true
+    ? DefaultLinkProps
+    : ButtonProps & LinkProps
   : ButtonProps;
 
 interface ExistedButtonProps {
@@ -20,21 +29,30 @@ interface ExistedButtonProps {
   href?: string;
 }
 
-export function Button<T extends boolean>({
+export function Button<T extends boolean, K extends boolean>({
   variant = 'primary',
   className,
   href,
   ...props
-}: ExistedButtonProps & ButtonOrLinkProps<T>) {
+}: ExistedButtonProps & ButtonOrLinkProps<T, K>) {
   className = clsx(styles[variant], className);
 
-  return href ? (
-    <Link
-      href={href}
-      className={className}
-      {...(props as Omit<LinkProps, 'href'>)}
-    />
-  ) : (
-    <button className={className} {...props} />
-  );
+  if (href)
+    return href.startsWith('/') ? (
+      <Link
+        href={href}
+        className={className}
+        {...(props as Omit<LinkProps, 'href'>)}
+      />
+    ) : (
+      <a
+        target="_blank"
+        rel="noopener"
+        href={href}
+        className={className}
+        {...(props as DefaultLinkProps)}
+      />
+    );
+
+  return <button className={className} {...(props as ButtonProps)} />;
 }
