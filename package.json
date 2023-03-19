@@ -1,16 +1,11 @@
 {
   "name": "next-api-handler-monorepo",
-  "version": "0.0.0",
   "engine": {
     "node": ">=16"
   },
   "description": "lightweight nextjs api handler wrapper, portable & configurable for serverless environment",
   "repository": "https://github.com/Howard86/next-api-handler",
   "private": true,
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
   "scripts": {
     "build": "turbo run build",
     "build:doc": "turbo run build --filter=doc",
@@ -21,9 +16,6 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "clean": "turbo run clean && rm -rf node_modules",
     "prepare": "husky install"
-  },
-  "engines": {
-    "node": ">=14"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.4.4",
