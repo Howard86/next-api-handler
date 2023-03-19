@@ -5,9 +5,9 @@ export default defineConfig((options) => ({
   format: ['cjs', 'esm'],
   splitting: true,
   treeshake: true,
-  sourcemap: true,
-  dts: true,
-  clean: true,
+  sourcemap: !options.watch,
+  dts: !options.watch,
+  clean: !options.watch,
   env: {
     NODE_ENV: options.watch ? 'development' : 'production',
   },
