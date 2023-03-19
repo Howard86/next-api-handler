@@ -3,26 +3,27 @@
   "pipeline": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["build/**", ".next/**"],
-      "env": ["NODE_ENV"]
+      "outputs": ["dist/**", ".next/**"],
+      "env": [
+        "NODE_ENV",
+        "NEXT_PUBLIC_DOCSEARCH_APP_ID",
+        "NEXT_PUBLIC_DOCSEARCH_API_KEY",
+        "NEXT_PUBLIC_DOCSEARCH_INDEX_NAME"
+      ]
     },
     "lint": {
       "outputs": []
     },
     "test": {
-      "outputs": [],
-      "dependsOn": ["build"]
+      "outputs": []
     },
     "cov": {
-      "outputs": [".nyc_output/**", "coverage"],
-      "dependsOn": ["build"]
+      "outputs": ["coverage"]
     },
     "cov:check": {
-      "dependsOn": ["test"],
       "outputs": []
     },
     "cov:send": {
-      "dependsOn": ["test"],
       "cache": false
     },
     "start": {

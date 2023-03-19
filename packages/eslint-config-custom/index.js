@@ -42,5 +42,9 @@ module.exports = {
       plugins: ['jest'],
       extends: ['plugin:jest/recommended'],
     },
+    {
+      files: ['**/*.js'],
+      rules: { '@typescript-eslint/no-var-requires': 'off' },
+    },
   ],
 };
