@@ -62,11 +62,7 @@ export class RouterBuilder extends ExpressLikeRouter {
       const initiatedTime = Date.now();
       const routerMethod = (req.method || 'GET') as RouterMethod;
 
-      this.getLogFormattedMessage(
-        routerMethod,
-        req.url,
-        HandlerLogType.Initiate
-      );
+      this.logHandler(HandlerLogType.Initiate, routerMethod, req.url);
 
       try {
         const handler = this.routeHandlerMap[routerMethod];
