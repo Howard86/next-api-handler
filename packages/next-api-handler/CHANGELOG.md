@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.7](https://github.com/Howard86/next-api-handler/compare/v0.4.6...v0.4.7) (2023-03-19)
+
+### Bug Fixes
+
+- fix turbo cache ([d8d03dd](https://github.com/Howard86/next-api-handler/commit/d8d03dd4dd4c053f12281c169d65d62362909879))
+
 ### [0.4.6](https://github.com/Howard86/next-api-handler/compare/v0.4.5...v0.4.6) (2023-03-15)
 
 ### Bug Fixes
