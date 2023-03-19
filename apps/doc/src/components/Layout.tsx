@@ -82,17 +82,11 @@ interface LayoutProps {
   children: React.ReactNode;
   title: string;
   tableOfContents: TableOfContents;
-  className?: string;
 }
 
 const allLinks = navigation.flatMap((section) => section.links);
 
-export function Layout({
-  children,
-  title,
-  tableOfContents,
-  className,
-}: LayoutProps) {
+export function Layout({ children, title, tableOfContents }: LayoutProps) {
   const router = useRouter();
   const isHomePage = router.pathname === '/';
 
@@ -121,7 +115,7 @@ export function Layout({
   }
 
   return (
-    <div className={className}>
+    <>
       <Header navigation={navigation} />
 
       {isHomePage && <Hero />}
@@ -243,6 +237,6 @@ export function Layout({
           </nav>
         </div>
       </div>
-    </div>
+    </>
   );
 }
