@@ -3,7 +3,7 @@
   "pipeline": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["build/**", ".next/**"],
+      "outputs": ["dist/**", ".next/**"],
       "env": [
         "NODE_ENV",
         "NEXT_PUBLIC_DOCSEARCH_APP_ID",
