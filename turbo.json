@@ -15,19 +15,15 @@
       "outputs": []
     },
     "test": {
-      "outputs": [],
-      "dependsOn": ["build"]
+      "outputs": []
     },
     "cov": {
-      "outputs": [".nyc_output/**", "coverage"],
-      "dependsOn": ["build"]
+      "outputs": ["coverage"]
     },
     "cov:check": {
-      "dependsOn": ["test"],
       "outputs": []
     },
     "cov:send": {
-      "dependsOn": ["test"],
       "cache": false
     },
     "start": {
