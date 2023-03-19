@@ -4,7 +4,7 @@ import { ApiLogger, DefaultApiLogger } from './api-logger';
 import { DEFAULT_MIDDLEWARE_ROUTER_METHOD } from './constants';
 import { makeErrorHandler } from './error-handler';
 import { ExpressLikeRouter } from './express-like-router';
-import { MethodNotAllowedException } from './http-exceptions';
+import { HttpException, MethodNotAllowedException } from './http-exceptions';
 import {
   ApiResponse,
   MiddlewareRouterMethod,
@@ -12,6 +12,13 @@ import {
   RouterBuilderOptions,
   RouterMethod,
 } from './type';
+
+const enum HandlerLogType {
+  Initiate,
+  Sent,
+  Error,
+  Success,
+}
 
 /**
  * A router builder is next api handler builder that exposes express-like api.
@@ -55,12 +62,16 @@ export class RouterBuilder extends ExpressLikeRouter {
       const initiatedTime = Date.now();
       const routerMethod = (req.method || 'GET') as RouterMethod;
 
+      this.getLogFormattedMessage(
+        routerMethod,
+        req.url,
+        HandlerLogType.Initiate
+      );
+
       try {
         const handler = this.routeHandlerMap[routerMethod];
-        this.logger.debug(`Initiated ${routerMethod} ${req.url}`);
 
         if (!handler) {
-          this.logger.debug(`Missed handler on ${routerMethod} ${req.url}`);
           res.setHeader('Allow', Object.keys(this.routeHandlerMap));
           throw new MethodNotAllowedException(
             `Method ${routerMethod} Not Allowed`
@@ -76,14 +87,18 @@ export class RouterBuilder extends ExpressLikeRouter {
         const data = await handler(req as NextApiRequestWithMiddleware, res);
 
         if (res.headersSent) {
-          this.logger.debug(
-            `Response already sent for ${routerMethod} ${req.url}`
+          this.logHandler(
+            HandlerLogType.Sent,
+            routerMethod,
+            req.url,
+            initiatedTime
           );
         } else {
-          this.logger.info(
-            `Successfully handled ${routerMethod} ${req.url} with ${
-              Date.now() - initiatedTime
-            }ms`
+          this.logHandler(
+            HandlerLogType.Success,
+            routerMethod,
+            req.url,
+            initiatedTime
           );
           res.status(200).json({
             success: true,
@@ -91,14 +106,73 @@ export class RouterBuilder extends ExpressLikeRouter {
           });
         }
       } catch (error) {
-        this.routerOptions.error(req, res, error as Error);
-        this.logger.error(
-          `Caught errors from ${routerMethod} ${req.url} with ${
-            Date.now() - initiatedTime
-          }ms`
+        this.logHandler(
+          HandlerLogType.Error,
+          routerMethod,
+          req.url,
+          initiatedTime,
+          error as Error
         );
+        this.routerOptions.error(req, res, error as Error);
       }
     };
+  }
+
+  private logHandler(
+    type: HandlerLogType,
+    routerMethod: RouterMethod,
+    url?: string,
+    initiatedTime?: number,
+    error?: Error
+  ) {
+    const meta = this.getLogFormattedMessage(routerMethod, url, initiatedTime);
+
+    switch (type) {
+      case HandlerLogType.Initiate:
+        this.logger.debug(`Initiated ${meta}`);
+        break;
+
+      case HandlerLogType.Sent:
+        this.logger.warn(`Response already sent for ${meta}`);
+        break;
+
+      case HandlerLogType.Success:
+        this.logger.info(`Successfully handled ${meta}`);
+        break;
+
+      case HandlerLogType.Error: {
+        if (error instanceof HttpException) {
+          const message = `Caught HttpException ${error.status} ${error.message} from ${meta}`;
+
+          if (error.status < 500) {
+            this.logger.warn(message);
+          } else {
+            this.logger.error(message);
+          }
+
+          break;
+        }
+
+        this.logger.error(
+          `Caught unexpected error from ${meta}, trace: ${error?.stack}`
+        );
+
+        break;
+      }
+
+      default:
+        break;
+    }
+  }
+
+  private getLogFormattedMessage(
+    RouterMethod: RouterMethod,
+    url?: string,
+    initiatedTime?: number
+  ) {
+    if (!initiatedTime) return `${RouterMethod} ${url}`;
+
+    return `${RouterMethod} ${url} in ${Date.now() - initiatedTime}ms`;
   }
 
   private applyErrorHandler(options: RouterBuilderOptions) {
