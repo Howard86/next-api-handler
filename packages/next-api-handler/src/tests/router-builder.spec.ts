@@ -91,6 +91,26 @@ describe('RouterBuilder', () => {
         },
       });
     });
+
+    it('should prevent sending response twice', async () => {
+      router.get((_req, res) => {
+        res.status(200).json({ message: 'TEST_MESSAGE_SENT' });
+
+        return 'TEST_MESSAGE_UNSENT';
+      });
+
+      await testApiHandler({
+        handler,
+        test: async ({ fetch }) => {
+          const res = await fetch();
+
+          expect(res.status).toBe(200);
+          await expect(res.json()).resolves.toStrictEqual({
+            message: 'TEST_MESSAGE_SENT',
+          });
+        },
+      });
+    });
   });
 
   describe('custom handler', () => {
