@@ -26,6 +26,6 @@
     "eslint-config-custom": "workspace:*",
     "start-server-and-test": "^2.0.0",
     "tsconfig": "workspace:*",
-    "typescript": "^4.9.5"
+    "typescript": "^5.0.0"
   }
 }
