@@ -37,7 +37,7 @@ import { createUser, type User } from '@/services/user';
 const router = new RouterBuilder();
 
 router
-  .get<string>(() => 'Hello World')
+  .get<string>(() => 'Hello World!')
   .post<User>(async (req) => createUser(req.body))
   .delete(() => {
     throw new ForbiddenException();

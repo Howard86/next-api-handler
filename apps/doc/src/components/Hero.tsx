@@ -9,18 +9,20 @@ import { GITHUB_URL } from '@/constants/url';
 import blurCyanImage from '@/images/blur-cyan.png';
 import blurIndigoImage from '@/images/blur-indigo.png';
 
-const codeLanguage = 'javascript';
-const code = `
-  import { RouterBuilder } from 'next-api-handler';
+const codeLanguage = 'typescript';
+const code = `import { RouterBuilder, ForbiddenException } from 'next-api-handler';
+import { createUser, type User } from '@/services/user';
 
-  const router = new RouterBuilder();
+const router = new RouterBuilder();
 
-  router
-    .get(() => [{ id: 1, name: 'John Doe' }]);
-    .post(async (req) => createUser(req.body));
+router
+  .get<string>(() => 'Hello World!')
+  .post<User>(async (req) => createUser(req.body))
+  .delete(() => {
+    throw new ForbiddenException();
+  });
 
-  export default router.build();
-`;
+export default router.build();`;
 
 const tabs = [
   { name: 'pages/api/users.ts', isActive: true },
