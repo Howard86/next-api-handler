@@ -18,7 +18,7 @@ import { createUser } from '@/services/user';
 const router = new RouterBuilder();
 
 router
-  .get(() => [{ id: 1, name: 'John Doe' }]);
+  .get(() => [{ id: 1, name: 'John Doe' }])
   .post(async (req) => createUser(req.body));
 
 export default router.build();
@@ -34,7 +34,7 @@ export default async function handler(req, res) {
     const user = await createUser(req.body);
     res.status(200).json({ success: true, data: user });
   } else if (req.method === 'GET') {
-    res.status(200).json({ success: true, data: { name: 'John Doe' } });
+    res.status(200).json({ success: true, data: [{ name: 'John Doe' }] });
   } else {
     res.setHeader('Allow', ['GET', 'POST']);
     res.status(405).json({
@@ -61,7 +61,7 @@ type User = {
 const router = new RouterBuilder();
 
 router
-  .get<User[]>(() => [{ id: 1, name: 'John Doe' }]);
+  .get<User[]>(() => [{ id: 1, name: 'John Doe' }])
   .post<User>(async (req) => createUser(req.body));
 
 export default router.build();
@@ -70,7 +70,13 @@ export default router.build();
 The following will show `TypeScript` error.
 
 ```ts
-router.put<User>(() => {});
+/**
+ *  Argument of type '() => { id: number; }' is not assignable to parameter of type 'NextApiHandlerWithMiddleware<User, TypedObject>'.
+ *  Type '{ id: number; }' is not assignable to type 'void | User | Promise<User>'.
+ *    Property 'name' is missing in type '{ id: number; }' but required in type 'User'.ts(2345)
+ *  user.ts(3, 3): 'name' is declared here.
+ * */
+router.put<User>(() => ({ id: 1 }));
 ```
 
 ---
