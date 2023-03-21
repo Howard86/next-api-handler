@@ -1,22 +1,47 @@
 {
   "name": "next-api-handler",
   "version": "0.4.7",
-  "description": "lightweight nextjs api handler wrapper, portable & configurable for serverless environment",
-  "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
-  "module": "dist/index.js",
-  "type": "module",
-  "sideEffects": false,
-  "repository": "https://github.com/Howard86/next-api-handler",
-  "license": "MIT",
+  "description": "Lightweight and Portable Next.js API builder",
   "keywords": [
     "next",
     "api",
     "restful",
     "middleware",
+    "error-handling",
     "express",
     "serverless"
   ],
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "module": "dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Howard86/next-api-handler",
+    "directory": "packages/next-api-handler"
+  },
+  "homepage": "https://next-api-handler.vercel.app",
+  "bugs": {
+    "url": "https://github.com/Howard86/next-api-handler/issues"
+  },
+  "author": {
+    "name": "Howard Tai",
+    "email": "howard@howardism.dev",
+    "url": "https://howardism.dev"
+  },
+  "license": "MIT",
   "scripts": {
     "clean": "rm -rf .turbo node_modules build dist coverage",
     "build": "tsup",
@@ -45,9 +70,6 @@
     "type-check": "tsc --noEmit",
     "prepare-release": "run-s reset-hard build test cov:check doc:html doc:publish"
   },
-  "engines": {
-    "node": ">=14"
-  },
   "devDependencies": {
     "@types/jest": "^29.4.3",
     "@types/node": "^18.15.3",
@@ -69,12 +91,10 @@
     "typedoc": "^0.23.26",
     "typescript": "^5.0.0"
   },
-  "files": [
-    "dist",
-    "LICENSE",
-    "README.md"
-  ],
   "peerDependencies": {
-    "next": ">= 9"
+    "next": ">= 9.0.0"
+  },
+  "engines": {
+    "node": ">=8.10"
   }
 }
