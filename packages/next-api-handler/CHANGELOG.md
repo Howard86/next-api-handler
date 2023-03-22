@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.8](https://github.com/Howard86/next-api-handler/compare/v0.4.7...v0.4.8) (2023-03-22)
+
+### Bug Fixes
+
+- **deps:** update dependency eslint-config-turbo to ^0.0.10 ([9e1cdbb](https://github.com/Howard86/next-api-handler/commit/9e1cdbbb6c6993639f38842055b2f770fc6476f2))
+- **doc:** fix sample codes ([c7513f1](https://github.com/Howard86/next-api-handler/commit/c7513f1adb3a65f71ae7ef48444bbc519b5198f6))
+
 ### [0.4.7](https://github.com/Howard86/next-api-handler/compare/v0.4.6...v0.4.7) (2023-03-19)
 
 ### Bug Fixes
