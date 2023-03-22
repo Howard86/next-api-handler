@@ -13,12 +13,9 @@ If there are shared logic that you want to execute before the handler function, 
 
 ```js
 // server/middleware/auth.js
-import {
-  RouterBuilder,
-  UnauthorizedException,
-  NotFoundException,
-} from 'next-api-handler';
-import { verify, getUserInfo } from '@/services/auth';
+import { NotFoundException, UnauthorizedException } from 'next-api-handler';
+
+import { getUserInfo, verify } from '@/services/auth';
 
 export const authMiddleware = async (req, res) => {
   const apiKey = req.cookies['Authorization'];
@@ -42,7 +39,8 @@ Then you can use the middleware in the router and pass on `user` from `req.middl
 
 ```js
 // pages/api/users/me.js
-import { RouterBuilder, ForbiddenException } from 'next-api-handler';
+import { ForbiddenException, RouterBuilder } from 'next-api-handler';
+
 import { authMiddleware } from '@/server/middleware/auth';
 import { updateUser } from '@/services/user';
 
@@ -77,13 +75,10 @@ The term _middleware_ could be misleading here.
 You can also use multiple middleware and pass on data from one middleware to another. As middleware is executed in the order of `use`, the data passed on will be in the same order.
 
 ```js
-// server/middleware/cookie.js
-import {
-  RouterBuilder,
-  UnauthorizedException,
-  NotFoundException,
-} from 'next-api-handler';
-import { getEmailFromCookie } from '@/services/users';
+// server/middleware/auth.js
+import { NotFoundException, UnauthorizedException } from 'next-api-handler';
+
+import { getEmailFromCookie, getUserByEmail } from '@/services/user';
 
 export const cookieMiddleware = async (req, res) => {
   const email = getEmailFromCookie(req.cookies['Authorization']);
@@ -106,7 +101,8 @@ Then you can use the middleware in the router and pass on `user` from `req.middl
 
 ```js
 // pages/api/users.js
-import { RouterBuilder, ForbiddenException } from 'next-api-handler';
+import { ForbiddenException, RouterBuilder } from 'next-api-handler';
+
 import { cookieMiddleware, userMiddleware } from '@/server/middleware/auth';
 import { updateUser } from '@/services/user';
 
@@ -132,12 +128,16 @@ You can also use multiple middleware and execute them in parallel with `inject` 
 ```js
 // server/middleware/auth.js
 import {
-  RouterBuilder,
   BadRequestException,
-  UnauthorizedException,
   NotFoundException,
+  UnauthorizedException,
 } from 'next-api-handler';
-import { verifyVersion, getEmailFromCookie } from '@/services/users';
+
+import {
+  getEmailFromCookie,
+  getUserByEmail,
+  verifyVersion,
+} from '@/services/user';
 
 export const versionMiddleware = (req, res) => {
   const version = req.headers['x-version'];
@@ -170,11 +170,12 @@ Then you can use the middleware in the router and pass on `user` from `req.middl
 
 ```js
 // pages/api/users.js
-import { RouterBuilder, ForbiddenException } from 'next-api-handler';
+import { ForbiddenException, RouterBuilder } from 'next-api-handler';
+
 import {
-  versionMiddleware,
   cookieMiddleware,
   userMiddleware,
+  versionMiddleware,
 } from '@/server/middleware/auth';
 import { updateUser } from '@/services/user';
 
@@ -200,12 +201,9 @@ You can also use middleware that is only specific to a route. This is useful whe
 
 ```js
 // server/middleware/auth.js
-import {
-  RouterBuilder,
-  UnauthorizedException,
-  NotFoundException,
-} from 'next-api-handler';
-import { verify, getUserInfo } from '@/services/auth';
+import { NotFoundException, UnauthorizedException } from 'next-api-handler';
+
+import { getUserInfo, verify } from '@/services/auth';
 
 export const authMiddleware = async (req, res) => {
   const apiKey = req.cookies['Authorization'];
@@ -257,13 +255,15 @@ If you are using `TypeScript`, we can also enforce the response type by using ge
 ```js
 // server/middleware/auth.ts
 import {
-  RouterBuilder,
   BadRequestException,
-  UnauthorizedException,
-  NotFoundException,
   ForbiddenException,
+  NextApiHandlerWithMiddleware,
+  NotFoundException,
+  UnauthorizedException,
 } from 'next-api-handler';
-import { verifyVersion, getEmailFromCookie } from '@/services/users';
+
+import { getUserByEmail, type User } from '@/services/user';
+import { getEmailFromCookie, verifyVersion } from '@/services/user';
 
 export type VersionMiddleware = {
   version: string,
@@ -271,10 +271,11 @@ export type VersionMiddleware = {
 
 export const versionMiddleware: NextApiHandlerWithMiddleware<
   VersionMiddleware
-> = (req, res) => {
+> = (req) => {
   const version = req.headers['x-version'];
 
-  if (!verifyVersion(version)) throw new BadRequestException();
+  if (typeof version !== 'string' || !verifyVersion(version))
+    throw new BadRequestException();
 
   return { version };
 };
@@ -285,17 +286,12 @@ export type CookieMiddleware = {
 
 export const cookieMiddleware: NextApiHandlerWithMiddleware<
   CookieMiddleware
-> = async (req, res) => {
+> = async (req) => {
   const email = getEmailFromCookie(req.cookies['Authorization']);
 
   if (!email) throw new UnauthorizedException();
 
   return { email };
-};
-
-export type User = {
-  email: string,
-  isAdmin: boolean,
 };
 
 export type UserMiddleware = {
@@ -305,8 +301,8 @@ export type UserMiddleware = {
 // Here we can pass required pre-executed middleware to the handler
 export const userMiddleware: NextApiHandlerWithMiddleware<
   UserMiddleware,
-  CookieMiddleware
-> = async (req, res) => {
+  CookieMiddleware & VersionMiddleware
+> = async (req) => {
   const user = await getUserByEmail(req.middleware.email);
 
   console.log(`Client side running version ${req.middleware.version}`);
@@ -320,7 +316,7 @@ export const userMiddleware: NextApiHandlerWithMiddleware<
 export const adminMiddleware: NextApiHandlerWithMiddleware<
   void,
   UserMiddleware
-> = async (req, res) => {
+> = async (req) => {
   if (!req.middleware.user.isAdmin) throw new ForbiddenException();
 };
 ```
@@ -329,17 +325,17 @@ Then you can use the middleware in the router and pass on `user` from `req.middl
 
 ```ts
 // pages/api/users.ts
-import { RouterBuilder, BadRequestException } from 'next-api-handler';
+import { BadRequestException, RouterBuilder } from 'next-api-handler';
+
 import {
-  versionMiddleware,
-  cookieMiddleware,
-  userMiddleware,
   adminMiddleware,
-  type User,
+  cookieMiddleware,
   type UserMiddleware,
+  userMiddleware,
   type VersionMiddleware,
+  versionMiddleware,
 } from '@/server/middleware/auth';
-import { updateUser, deleteUser } from '@/services/user';
+import { deleteUser, updateUser, type User } from '@/services/user';
 
 const router = new RouterBuilder();
 
@@ -349,21 +345,20 @@ router
   .use(userMiddleware)
   .use('PUT', adminMiddleware)
   .use('DELETE', adminMiddleware)
-  .put<User>((req) => updateUser(req.body));
+  .put<User>((req) => updateUser(req.body))
   // here we add required middleware type to the handler
-  .get<User, UserMiddleware>(
-    (req) => req.middleware.user
-  )
+  .get<User, UserMiddleware>((req) => req.middleware.user)
   // here we can combine multiple middleware types
-  .delete<User, UserMiddleware & VersionMiddleware>(
-    async (req) => {
-      const user = await deleteUser(req.middleware.user.email, req.middleware.version)
+  .delete<User, UserMiddleware & VersionMiddleware>(async (req) => {
+    const user = await deleteUser(
+      req.middleware.user.email,
+      req.middleware.version
+    );
 
-      if (!user) throw new BadRequestException('Unmatched version');
+    if (!user) throw new BadRequestException('Unmatched version');
 
-      return user
-    }
-  );
+    return user;
+  });
 
 export default router.build();
 ```
