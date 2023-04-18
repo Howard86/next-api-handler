@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.9](https://github.com/Howard86/next-api-handler/compare/v0.4.8...v0.4.9) (2023-04-18)
+
+### Bug Fixes
+
+- skip api request for non-restful router methods ([e40d27e](https://github.com/Howard86/next-api-handler/commit/e40d27e47fab32ba62c05df63a369e8d1c47f567))
+
 ### [0.4.8](https://github.com/Howard86/next-api-handler/compare/v0.4.7...v0.4.8) (2023-03-22)
 
 ### Bug Fixes
