@@ -1,6 +1,6 @@
 {
   "name": "next-api-handler",
-  "version": "0.4.9",
+  "version": "0.4.10",
   "description": "Lightweight and Portable Next.js API builder",
   "keywords": [
     "next",

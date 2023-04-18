@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.4.10](https://github.com/Howard86/next-api-handler/compare/v0.4.9...v0.4.10) (2023-04-18)
+
+### Bug Fixes
+
+- add missing middleware call ([4355c58](https://github.com/Howard86/next-api-handler/commit/4355c589ca59056c85d4fc588e6b7bfb8bba1561))
+
 ### [0.4.9](https://github.com/Howard86/next-api-handler/compare/v0.4.8...v0.4.9) (2023-04-18)
 
 ### Bug Fixes
