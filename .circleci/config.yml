@@ -24,7 +24,7 @@ jobs:
           name: Install pnpm package manager
           command: |
             corepack enable
-            corepack prepare pnpm@latest-7 --activate
+            corepack prepare pnpm@latest --activate
 
       - run:
           name: Install Dependencies

@@ -1,7 +1,10 @@
 import type { NextApiHandler, NextApiRequest, NextApiResponse } from 'next';
 
 import { ApiLogger, DefaultApiLogger } from './api-logger';
-import { DEFAULT_MIDDLEWARE_ROUTER_METHOD } from './constants';
+import {
+  DEFAULT_MIDDLEWARE_ROUTER_METHOD,
+  SUPPORTED_ROUTER_METHODS,
+} from './constants';
 import { makeErrorHandler } from './error-handler';
 import { ExpressLikeRouter } from './express-like-router';
 import { HttpException, MethodNotAllowedException } from './http-exceptions';
@@ -14,6 +17,7 @@ import {
 } from './type';
 
 const enum HandlerLogType {
+  Skip,
   Initiate,
   Sent,
   Error,
@@ -63,6 +67,17 @@ export class RouterBuilder extends ExpressLikeRouter {
       const routerMethod = (req.method || 'GET') as RouterMethod;
 
       this.logHandler(HandlerLogType.Initiate, routerMethod, req.url);
+
+      if (!SUPPORTED_ROUTER_METHODS.includes(routerMethod)) {
+        this.logHandler(
+          HandlerLogType.Skip,
+          routerMethod,
+          req.url,
+          initiatedTime
+        );
+        res.end();
+        return;
+      }
 
       try {
         const handler = this.routeHandlerMap[routerMethod];
@@ -126,6 +141,10 @@ export class RouterBuilder extends ExpressLikeRouter {
     switch (type) {
       case HandlerLogType.Initiate:
         this.logger.debug(`Initiated ${meta}`);
+        break;
+
+      case HandlerLogType.Skip:
+        this.logger.debug(`Skipped ${meta}`);
         break;
 
       case HandlerLogType.Sent:

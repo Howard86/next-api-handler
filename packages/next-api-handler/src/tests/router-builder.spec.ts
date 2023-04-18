@@ -1,5 +1,6 @@
 import { testApiHandler } from 'next-test-api-route-handler';
 
+import { SUPPORTED_ROUTER_METHODS } from '../lib/constants';
 import { RouterBuilder } from '../lib/router-builder';
 import { NextApiHandlerWithMiddleware, RouterMethod } from '../lib/type';
 
@@ -8,19 +9,6 @@ import 'jest-extended';
 describe('RouterBuilder', () => {
   let router: RouterBuilder;
   let handler: ReturnType<RouterBuilder['build']>;
-
-  // TODO: check other router methods
-  const ROUTE_METHODS: RouterMethod[] = [
-    'GET',
-    // 'HEAD',
-    'PATCH',
-    // 'OPTIONS',
-    // 'CONNECT',
-    'DELETE',
-    'TRACE',
-    'POST',
-    'PUT',
-  ];
 
   beforeEach(() => {
     router = new RouterBuilder();
@@ -73,12 +61,23 @@ describe('RouterBuilder', () => {
   });
 
   describe('default handler', () => {
+    it('should return void for non supported router methods', async () => {
+      await testApiHandler({
+        handler,
+        test: async ({ fetch }) => {
+          const res = await fetch({ method: 'TRACE' });
+
+          expect(res.status).toBeDefined();
+        },
+      });
+    });
+
     it('should return 405 for all unhandled routes', async () => {
       await testApiHandler({
         handler,
         test: async ({ fetch }) => {
           await Promise.all(
-            ROUTE_METHODS.map(async (method) => {
+            SUPPORTED_ROUTER_METHODS.map(async (method) => {
               const res = await fetch({ method });
 
               expect(res.status).toBe(405);
@@ -116,7 +115,7 @@ describe('RouterBuilder', () => {
   describe('custom handler', () => {
     it('should return value controlled by custom handler', async () => {
       await Promise.all(
-        ROUTE_METHODS.map(async (method) => {
+        SUPPORTED_ROUTER_METHODS.map(async (method) => {
           const customHandler = jest.fn(
             (() =>
               method + '_TEST_MESSAGE') as NextApiHandlerWithMiddleware<string>
@@ -145,7 +144,7 @@ describe('RouterBuilder', () => {
 
     it('should handle error thrown by custom handler', async () => {
       await Promise.all(
-        ROUTE_METHODS.map(async (method) => {
+        SUPPORTED_ROUTER_METHODS.map(async (method) => {
           const customHandler = jest.fn((() => {
             throw new Error(method + '_TEST_ERROR');
           }) as NextApiHandlerWithMiddleware);
@@ -173,7 +172,7 @@ describe('RouterBuilder', () => {
 
     it('should return value controlled by asynchronous handler', async () => {
       await Promise.all(
-        ROUTE_METHODS.map(async (method) => {
+        SUPPORTED_ROUTER_METHODS.map(async (method) => {
           const customHandler = jest.fn((async () =>
             Promise.resolve(
               method + '_TEST_MESSAGE'
@@ -202,7 +201,7 @@ describe('RouterBuilder', () => {
 
     it('should handle error thrown by asynchronous handler', async () => {
       await Promise.all(
-        ROUTE_METHODS.map(async (method) => {
+        SUPPORTED_ROUTER_METHODS.map(async (method) => {
           const customHandler = jest.fn((async () =>
             Promise.reject(
               new Error(method + '_TEST_ERROR')
