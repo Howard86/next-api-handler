@@ -68,18 +68,25 @@ export class RouterBuilder extends ExpressLikeRouter {
 
       this.logHandler(HandlerLogType.Initiate, routerMethod, req.url);
 
-      if (!SUPPORTED_ROUTER_METHODS.includes(routerMethod)) {
-        this.logHandler(
-          HandlerLogType.Skip,
-          routerMethod,
-          req.url,
-          initiatedTime
-        );
-        res.end();
-        return;
-      }
-
       try {
+        if (!SUPPORTED_ROUTER_METHODS.includes(routerMethod)) {
+          await this.resolveMiddlewareListAndQueue(
+            routerMethod,
+            req as NextApiRequestWithMiddleware,
+            res
+          );
+
+          this.logHandler(
+            HandlerLogType.Skip,
+            routerMethod,
+            req.url,
+            initiatedTime
+          );
+
+          res.end();
+          return;
+        }
+
         const handler = this.routeHandlerMap[routerMethod];
 
         if (!handler) {
@@ -104,18 +111,19 @@ export class RouterBuilder extends ExpressLikeRouter {
             req.url,
             initiatedTime
           );
-        } else {
-          this.logHandler(
-            HandlerLogType.Success,
-            routerMethod,
-            req.url,
-            initiatedTime
-          );
-          res.status(200).json({
-            success: true,
-            data,
-          });
+          return;
         }
+
+        this.logHandler(
+          HandlerLogType.Success,
+          routerMethod,
+          req.url,
+          initiatedTime
+        );
+        res.status(200).json({
+          success: true,
+          data,
+        });
       } catch (error) {
         this.logHandler(
           HandlerLogType.Error,
