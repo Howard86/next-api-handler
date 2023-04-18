@@ -61,6 +61,17 @@ describe('RouterBuilder', () => {
   });
 
   describe('default handler', () => {
+    it('should return void for non supported router methods', async () => {
+      await testApiHandler({
+        handler,
+        test: async ({ fetch }) => {
+          const res = await fetch({ method: 'TRACE' });
+
+          expect(res.status).toBeDefined();
+        },
+      });
+    });
+
     it('should return 405 for all unhandled routes', async () => {
       await testApiHandler({
         handler,
