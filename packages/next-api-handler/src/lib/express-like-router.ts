@@ -26,12 +26,8 @@ export abstract class ExpressLikeRouter {
   readonly inject = this.addMiddleware(this.middlewareParallelListMap);
 
   readonly get = this.addRouterMethod('GET');
-  readonly head = this.addRouterMethod('HEAD');
   readonly patch = this.addRouterMethod('PATCH');
-  readonly options = this.addRouterMethod('OPTIONS');
-  readonly connect = this.addRouterMethod('CONNECT');
   readonly delete = this.addRouterMethod('DELETE');
-  readonly trace = this.addRouterMethod('TRACE');
   readonly post = this.addRouterMethod('POST');
   readonly put = this.addRouterMethod('PUT');
 

@@ -66,16 +66,7 @@ export type InternalMiddlewareMap = Partial<
   >
 >;
 
-export type RouterMethod =
-  | 'GET'
-  | 'HEAD'
-  | 'PATCH'
-  | 'OPTIONS'
-  | 'CONNECT'
-  | 'DELETE'
-  | 'TRACE'
-  | 'POST'
-  | 'PUT';
+export type RouterMethod = 'GET' | 'PATCH' | 'DELETE' | 'POST' | 'PUT';
 
 export type MiddlewareRouterMethod =
   | typeof DEFAULT_MIDDLEWARE_ROUTER_METHOD
