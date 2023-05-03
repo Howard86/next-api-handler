@@ -2,7 +2,6 @@ import type { NextApiHandler } from 'next';
 
 import { DEFAULT_MIDDLEWARE_ROUTER_METHOD } from './constants';
 import {
-  AddMiddleware,
   InternalMiddlewareMap,
   MiddlewareRouterMethod,
   NextApiHandlerWithMiddleware,
@@ -134,22 +133,24 @@ export abstract class ExpressLikeRouter {
    */
   private addMiddleware(
     middlewareMap: InternalMiddlewareMap
-  ): AddMiddleware<ExpressLikeRouter> {
-    return <
-      T extends TypedObject | void = TypedObject,
-      M extends TypedObject = TypedObject
-    >(
-      methodOrHandler:
-        | MiddlewareRouterMethod
-        | NextApiHandlerWithMiddleware<T, M>,
-      handler?: NextApiHandlerWithMiddleware<T, M>
-    ): ExpressLikeRouter => {
+  ): <
+    T extends TypedObject | void = TypedObject,
+    M extends TypedObject = TypedObject
+  >(
+    methodOrHandler:
+      | MiddlewareRouterMethod
+      | NextApiHandlerWithMiddleware<T, M>,
+    handler?: NextApiHandlerWithMiddleware<T, M>
+  ) => ExpressLikeRouter {
+    return (methodOrHandler, handler?) => {
       const isSingleParam = typeof methodOrHandler !== 'string';
 
       this.addOrSetPartialArrayMap(
         middlewareMap,
         isSingleParam ? DEFAULT_MIDDLEWARE_ROUTER_METHOD : methodOrHandler,
-        isSingleParam ? methodOrHandler : handler
+        isSingleParam
+          ? methodOrHandler
+          : (handler as NextApiHandlerWithMiddleware)
       );
 
       return this;
@@ -163,15 +164,14 @@ export abstract class ExpressLikeRouter {
    *
    * @param {RouterMethod} method - The HTTP method to add the route handler for
    * @returns {(handler: NextApiHandlerWithMiddleware) => ExpressLikeRouter} - The `addRouterMethod` function that can add a route handler for the specified HTTP method
-   * @template T - The type of the request result
-   * @template M - The type of the request middleware
+   *
    */
   private addRouterMethod(
     method: RouterMethod
-  ): (handler: NextApiHandlerWithMiddleware) => ExpressLikeRouter {
-    return <T, M extends TypedObject = TypedObject>(
-      handler: NextApiHandlerWithMiddleware<T, M>
-    ): ExpressLikeRouter => {
+  ): <T, M extends TypedObject = TypedObject>(
+    handler: NextApiHandlerWithMiddleware<T, M>
+  ) => ExpressLikeRouter {
+    return (handler) => {
       this.routeHandlerMap[method] = handler;
       return this;
     };

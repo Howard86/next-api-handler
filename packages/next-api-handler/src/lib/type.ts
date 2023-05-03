@@ -84,44 +84,9 @@ export type RouterMethod = 'GET' | 'PATCH' | 'DELETE' | 'POST' | 'PUT';
  * An object representing middleware that can be added to a router builder.
  * The keys represent the middleware router method (e.g. 'ALL') and the values are arrays of middleware functions.
  */
-export type InternalMiddlewareMap = Partial<
-  Record<
-    MiddlewareRouterMethod,
-    NextApiHandlerWithMiddleware<
-      TypedObject | void,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      any
-    >[]
-  >
+export type InternalMiddlewareMap<
+  T extends TypedObject = TypedObject,
+  M extends TypedObject = TypedObject
+> = Partial<
+  Record<MiddlewareRouterMethod, NextApiHandlerWithMiddleware<T | void, M>[]>
 >;
-
-/**
- * A function that adds middleware to a router builder.
- */
-export type AddMiddleware<R> = {
-  /**
-   * Add middleware to the router builder for a specific method.
-   * @param {MiddlewareRouterMethod} method - The middleware router method to use.
-   * @param {NextApiHandlerWithMiddleware<T, M>} handler - The middleware function to add.
-   * @returns {R} The router builder instance.
-   */
-  <
-    T extends TypedObject | void = TypedObject,
-    M extends TypedObject = TypedObject
-  >(
-    method: MiddlewareRouterMethod,
-    handler: NextApiHandlerWithMiddleware<T, M>
-  ): R;
-
-  /**
-   * Add middleware to the router builder for all methods.
-   * @param {NextApiHandlerWithMiddleware<T, M>} handler - The middleware function to add.
-   * @returns {R} The router builder instance.
-   */
-  <
-    T extends TypedObject | void = TypedObject,
-    M extends TypedObject = TypedObject
-  >(
-    handler: NextApiHandlerWithMiddleware<T, M>
-  ): R;
-};
