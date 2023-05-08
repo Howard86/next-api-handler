@@ -16,6 +16,11 @@ import {
   RouterMethod,
 } from './type';
 
+/**
+ * The types of logs that can be recorded for the router handler
+ * @readonly
+ * @enum {number}
+ */
 const enum HandlerLogType {
   Skip,
   Initiate,
@@ -25,42 +30,58 @@ const enum HandlerLogType {
 }
 
 /**
- * A router builder is next api handler builder that exposes express-like api.
+ * A router builder is a Next.js API handler builder that exposes an Express-like API.
  *
- * ### Example (basic usage)
- * ```js
- * // In next.js /pages/api/[route]
- * import { RouterBuilder } from 'next-api-handler'
- * const router = new RouterBuilder().build()
- * export default router
+ * @class
+ * @extends {ExpressLikeRouter}
+ * @public
+ * @example
+ * ```ts
+ * import { RouterBuilder, ForbiddenException } from 'next-api-handler';
+ * import { createUser, type User } from '@/services/user';
+ *
+ * const router = new RouterBuilder();
+ *
+ * router
+ *  .get<string>(() => 'Hello World!')
+ *  .post<User>(async (req) => createUser(req.body))
+ *  .delete(() => {
+ *    throw new ForbiddenException();
+ *  });
+ *
+ * export default router.build();
  * ```
- *
- * ### Example (add RESTful method)
- * ```js
- * import { RouterBuilder } from 'next-api-handler'
- * const router = new RouterBuilder().get((req, res) => "RESPONSE")
- * export default router
- * ```
- *
- * ### Example (add async method)
- * ```js
- * import { RouterBuilder } from 'next-api-handler'
- * const handler = new RouterBuilder().get(async (req, res) => "ASYNC RESPONSE")
- * export default router
- * ```
- *
- * @returns a builder that can build a next.js api handler.
  */
 export class RouterBuilder extends ExpressLikeRouter {
-  private readonly routerOptions = {} as Required<RouterBuilderOptions>;
+  /**
+   * Options for configuring the router builder
+   * @private
+   * @type {Required<RouterBuilderOptions>}
+   */
+  private readonly routerOptions: Required<RouterBuilderOptions> =
+    {} as Required<RouterBuilderOptions>;
+
+  /**
+   * The logger used by the router builder
+   * @private
+   * @type {ApiLogger}
+   */
   private readonly logger: ApiLogger;
 
+  /**
+   * Create a new instance of the RouterBuilder
+   * @param {RouterBuilderOptions} options - Options to configure the router builder
+   */
   constructor(options: RouterBuilderOptions = {}) {
     super();
     this.applyErrorHandler(options);
     this.logger = options.logger || new DefaultApiLogger(options.loggerOption);
   }
 
+  /**
+   * Builds a Next.js API handler
+   * @returns {NextApiHandler} - a Next.js API handler
+   */
   public build(): NextApiHandler {
     return async (req: NextApiRequest, res: NextApiResponse<ApiResponse>) => {
       const initiatedTime = Date.now();
@@ -137,6 +158,15 @@ export class RouterBuilder extends ExpressLikeRouter {
     };
   }
 
+  /**
+   * Logs a handler event
+   * @private
+   * @param {HandlerLogType} type - The type of log event to record
+   * @param {RouterMethod} routerMethod - The router method being called
+   * @param {string} [url] - The URL for the router method being called
+   * @param {number} [initiatedTime] - The time at which the router method was initiated
+   * @param {Error} [error] - An error object associated with the event (if applicable)
+   */
   private logHandler(
     type: HandlerLogType,
     routerMethod: RouterMethod,
@@ -188,6 +218,14 @@ export class RouterBuilder extends ExpressLikeRouter {
     }
   }
 
+  /**
+   * Gets a formatted log message for the current handler event
+   * @private
+   * @param {RouterMethod} RouterMethod - The router method being called
+   * @param {string} [url] - The URL for the router method being called
+   * @param {number} [initiatedTime] - The time at which the router method was initiated
+   * @returns {string} - A formatted log message
+   */
   private getLogFormattedMessage(
     RouterMethod: RouterMethod,
     url?: string,
@@ -198,6 +236,11 @@ export class RouterBuilder extends ExpressLikeRouter {
     return `${RouterMethod} ${url} in ${Date.now() - initiatedTime}ms`;
   }
 
+  /**
+   * Applies the error handler to the router builder
+   * @private
+   * @param {RouterBuilderOptions} options - Options to configure the router builder
+   */
   private applyErrorHandler(options: RouterBuilderOptions) {
     this.routerOptions.error =
       options.error ||
@@ -208,6 +251,14 @@ export class RouterBuilder extends ExpressLikeRouter {
       );
   }
 
+  /**
+   * Resolves the middleware list and queue for the current router method
+   * @private
+   * @param {RouterMethod} routerMethod - The router method being called
+   * @param {NextApiRequestWithMiddleware} req - The Next.js API request object with middleware support
+   * @param {NextApiResponse<ApiResponse>} res - The Next.js API response object
+   * @returns {Promise<void>} - A promise that resolves when the middleware list and queue are complete
+   */
   private async resolveMiddlewareListAndQueue(
     routerMethod: RouterMethod,
     req: NextApiRequestWithMiddleware,
@@ -231,6 +282,14 @@ export class RouterBuilder extends ExpressLikeRouter {
     await this.resolveMiddlewareQueue(routerMethod, req, res);
   }
 
+  /**
+   * Gets a list of middleware promises for the current router method
+   * @private
+   * @param {MiddlewareRouterMethod} method - The middleware router method being called
+   * @param {NextApiRequestWithMiddleware} req - The Next.js API request object with middleware support
+   * @param {NextApiResponse<ApiResponse>} res - The Next.js API response object
+   * @returns {Promise<void>[]} - An array of promises that resolve when the middleware functions complete
+   */
   private getMiddlewarePromiseList(
     method: MiddlewareRouterMethod,
     req: NextApiRequestWithMiddleware,
@@ -253,6 +312,14 @@ export class RouterBuilder extends ExpressLikeRouter {
     });
   }
 
+  /**
+   * Resolves the middleware queue for the current router method
+   * @private
+   * @param {MiddlewareRouterMethod} method - The middleware router method being called
+   * @param {NextApiRequestWithMiddleware} req - The Next.js API request object with middleware support
+   * @param {NextApiResponse<ApiResponse>} res - The Next.js API response object
+   * @returns {Promise<void>} - A promise that resolves when the middleware queue is complete
+   */
   private async resolveMiddlewareQueue(
     method: MiddlewareRouterMethod,
     req: NextApiRequestWithMiddleware,
