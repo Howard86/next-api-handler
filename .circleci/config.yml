@@ -1,7 +1,7 @@
 # https://circleci.com/docs/2.0/language-javascript/
 version: 2.1
 orbs:
-  codecov: codecov/codecov@3.2.0
+  codecov: codecov/codecov@3.2.5
   cypress: cypress-io/cypress@2.1.0
 executors:
   cypress-node:
