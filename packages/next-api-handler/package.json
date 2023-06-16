@@ -87,7 +87,7 @@
     "standard-version": "^9.5.0",
     "ts-jest": "^29.0.5",
     "tsconfig": "workspace:*",
-    "tsup": "^6.6.3",
+    "tsup": "^7.0.0",
     "typedoc": "^0.24.0",
     "typescript": "^5.0.0"
   },
