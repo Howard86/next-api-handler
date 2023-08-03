@@ -6,7 +6,7 @@ orbs:
 executors:
   cypress-node:
     docker:
-      - image: 'cypress/base:16.18.1'
+      - image: 'cypress/base:18.16.1'
 jobs:
   'node-16':
     docker:
