@@ -16,7 +16,7 @@ type DefaultLinkProps = Omit<
 
 type ButtonOrLinkProps<
   IsLink extends boolean,
-  IsExternal extends boolean = false
+  IsExternal extends boolean = false,
 > = IsLink extends true
   ? IsExternal extends true
     ? DefaultLinkProps

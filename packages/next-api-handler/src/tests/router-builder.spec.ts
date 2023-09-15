@@ -255,7 +255,6 @@ describe('RouterBuilder', () => {
     })) as NextApiHandlerWithMiddleware<UserMiddleware, CookieMiddleware>);
 
     it('should accept middleware when returning void', async () => {
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
       const customMiddleware = jest.fn(() => {});
       router.use(customMiddleware).get<string>(() => 'TEST_MESSAGE');
 

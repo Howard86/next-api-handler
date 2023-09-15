@@ -13,7 +13,7 @@ export type TypedObject<T = unknown> = Record<string, T>;
  * The Next.js API request with `req.middleware` available.
  */
 export interface NextApiRequestWithMiddleware<
-  M extends TypedObject = TypedObject
+  M extends TypedObject = TypedObject,
 > extends NextApiRequest {
   /**
    * An object containing middleware data.
@@ -31,7 +31,7 @@ export interface NextApiRequestWithMiddleware<
  */
 export type NextApiHandlerWithMiddleware<
   T = unknown,
-  M extends TypedObject = TypedObject
+  M extends TypedObject = TypedObject,
 > = (
   req: NextApiRequestWithMiddleware<M>,
   res: NextApiResponse
@@ -86,7 +86,7 @@ export type RouterMethod = 'GET' | 'PATCH' | 'DELETE' | 'POST' | 'PUT';
  */
 export type InternalMiddlewareMap<
   T extends TypedObject = TypedObject,
-  M extends TypedObject = TypedObject
+  M extends TypedObject = TypedObject,
 > = Partial<
   Record<MiddlewareRouterMethod, NextApiHandlerWithMiddleware<T | void, M>[]>
 >;

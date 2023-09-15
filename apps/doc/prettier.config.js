@@ -1,4 +1,6 @@
+const base = require('../../prettier.config');
+
 module.exports = {
-  singleQuote: true,
-  plugins: [require('prettier-plugin-tailwindcss')],
+  ...base,
+  plugins: ['prettier-plugin-tailwindcss'],
 };
