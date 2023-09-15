@@ -1,7 +1,7 @@
 {
   "name": "next-api-handler-monorepo",
   "engine": {
-    "node": ">=16"
+    "node": ">=18"
   },
   "description": "lightweight nextjs api handler wrapper, portable & configurable for serverless environment",
   "repository": "https://github.com/Howard86/next-api-handler",
@@ -31,5 +31,6 @@
     "prettier": "^3.0.3",
     "turbo": "^1.10.13",
     "typescript": "^5.2.2"
-  }
+  },
+  "packageManager": "pnpm@8.7.0"
 }

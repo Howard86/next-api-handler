@@ -2,15 +2,11 @@
 version: 2.1
 orbs:
   codecov: codecov/codecov@3.2.0
-  cypress: cypress-io/cypress@2.1.0
-executors:
-  cypress-node:
-    docker:
-      - image: 'cypress/base:16.18.1'
+  cypress: cypress-io/cypress@3.1.4
 jobs:
-  'node-16':
+  'node-18':
     docker:
-      - image: cimg/node:16.20.0
+      - image: cimg/node:18
     resource_class: large
     parallelism: 1
 
@@ -24,7 +20,7 @@ jobs:
           name: Install pnpm package manager
           command: |
             corepack enable
-            corepack prepare pnpm@latest --activate
+            corepack prepare pnpm@8.7.0 --activate
 
       - run:
           name: Install Dependencies
@@ -52,12 +48,12 @@ workflows:
   version: 2
   build:
     jobs:
-      - 'node-16'
+      - 'node-18'
       - cypress/run:
-          executor: cypress-node
+          cypress-cache-key: cypress-cache-{{ arch }}-{{ checksum "packages/next-api-handler/package.json" }}-{{ checksum "apps/example/package.json" }}
           working_directory: apps/example
           record: true
           tags: circleci
-          build: cd ../.. && pnpm turbo run build --filter=example
-          start: cd ../.. && pnpm turbo run start --filter=example
-          install-command: npm i -g pnpm && pnpm install --frozen-lockfile=false
+          install-command: corepack enable && corepack prepare pnpm@8.7.0 --activate && pnpm install --frozen-lockfile=false
+          post-install: pnpm turbo run build --filter=example
+          start-command: pnpm turbo run start --filter=example
