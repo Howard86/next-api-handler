@@ -20,14 +20,14 @@ export type TypedObject<T = unknown> = Record<string, T>;
 
 export type NextApiHandlerWithMiddleware<
   T = unknown,
-  M extends TypedObject = TypedObject
+  M extends TypedObject = TypedObject,
 > = (
   req: NextApiRequestWithMiddleware<M>,
   res: NextApiResponse
 ) => T | Promise<T> | void;
 
 export interface NextApiRequestWithMiddleware<
-  M extends TypedObject = TypedObject
+  M extends TypedObject = TypedObject,
 > extends NextApiRequest {
   middleware: M;
 }

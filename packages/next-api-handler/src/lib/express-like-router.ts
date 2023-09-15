@@ -135,7 +135,7 @@ export abstract class ExpressLikeRouter {
     middlewareMap: InternalMiddlewareMap
   ): <
     T extends TypedObject | void = TypedObject,
-    M extends TypedObject = TypedObject
+    M extends TypedObject = TypedObject,
   >(
     methodOrHandler:
       | MiddlewareRouterMethod
