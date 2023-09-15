@@ -12,12 +12,26 @@
     "serverless"
   ],
   "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
+  "types": "dist/index.d.ts",
   "module": "dist/index.js",
+  "typesVersions": {
+    "*": {
+      ".": [
+        "dist/index.d.ts"
+      ],
+      "beta": [
+        "dist/beta/index.d.ts"
+      ]
+    }
+  },
   "exports": {
     ".": {
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./beta": {
+      "import": "./dist/beta/index.js",
+      "require": "./dist/beta/index.cjs"
     }
   },
   "type": "module",
@@ -44,6 +58,7 @@
   "license": "MIT",
   "scripts": {
     "clean": "rm -rf .turbo node_modules build dist coverage",
+    "dev": "pnpm watch:build",
     "build": "tsup",
     "fix": "run-s fix:*",
     "fix:prettier": "prettier \"src/**/*.ts\" --write --list-different",
@@ -92,9 +107,9 @@
     "typescript": "^5.2.2"
   },
   "peerDependencies": {
-    "next": ">= 9.0.0"
+    "next": ">=13.0.0"
   },
   "engines": {
-    "node": ">=8.10"
+    "node": ">=18"
   }
 }
