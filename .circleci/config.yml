@@ -1,14 +1,15 @@
 # https://circleci.com/docs/2.0/language-javascript/
 version: 2.1
+
 orbs:
-  codecov: codecov/codecov@3.2.0
+  codecov: codecov/codecov@3.2.5
   cypress: cypress-io/cypress@3.1.4
+
 jobs:
-  'node-18':
+  unit-test-and-check-coverage:
     docker:
-      - image: cimg/node:18
+      - image: cimg/node:18.17.1
     resource_class: large
-    parallelism: 1
 
     steps:
       - checkout
@@ -19,8 +20,8 @@ jobs:
       - run:
           name: Install pnpm package manager
           command: |
-            corepack enable
-            corepack prepare pnpm@8.7.0 --activate
+            sudo corepack enable
+            sudo corepack prepare pnpm@8.7.0 --activate
 
       - run:
           name: Install Dependencies
@@ -44,16 +45,44 @@ jobs:
           name: Verify coverages are meeting standards
           command: pnpm turbo run cov:check --filter=next-api-handler
 
-workflows:
-  version: 2
-  build:
-    jobs:
-      - 'node-18'
-      - cypress/run:
-          cypress-cache-key: cypress-cache-{{ arch }}-{{ checksum "packages/next-api-handler/package.json" }}-{{ checksum "apps/example/package.json" }}
-          working_directory: apps/example
-          record: true
-          tags: circleci
-          install-command: corepack enable && corepack prepare pnpm@8.7.0 --activate && pnpm install --frozen-lockfile=false
+      - store_test_results:
+          path: packages/next-api-handler/coverage
+
+  install-cypress-and-persist:
+    executor:
+      name: cypress/default
+      node-version: 18.17.1
+    steps:
+      - cypress/install:
+          cypress-cache-key: cypress-cache-{{ arch }}-{{ checksum "../../packages/next-api-handler/package.json" }}-{{ checksum "package.json" }}
+          working-directory: apps/example
+          install-command: sudo corepack enable && sudo corepack prepare pnpm@8.7.0 --activate && pnpm install --frozen-lockfile=false
           post-install: pnpm turbo run build --filter=example
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - .cache/Cypress
+            - project
+
+  run-test-in-parallel:
+    executor:
+      name: cypress/default
+      node-version: 18.17.1
+    steps:
+      - attach_workspace:
+          at: ~/
+      - cypress/run-tests:
+          working-directory: apps/example
           start-command: pnpm turbo run start --filter=example
+          cypress-command: pnpm cypress:headless --record --parallel --ci-build-id $CIRCLE_WORKFLOW_ID
+
+workflows:
+  build-and-test:
+    jobs:
+      - unit-test-and-check-coverage
+      - install-cypress-and-persist:
+          requires:
+            - unit-test-and-check-coverage
+      - run-test-in-parallel:
+          requires:
+            - install-cypress-and-persist
