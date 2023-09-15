@@ -14,18 +14,18 @@
     "e2e:headless": "start-server-and-test start http://localhost:3000 cypress:headless"
   },
   "dependencies": {
-    "next": "^13.2.4",
+    "next": "^13.4.19",
     "next-api-handler": "workspace:*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@types/node": "^18.15.3",
-    "@types/react": "^18.0.28",
-    "cypress": "^12.8.0",
+    "@types/node": "^20.6.0",
+    "@types/react": "^18.2.21",
+    "cypress": "^13.2.0",
     "eslint-config-custom": "workspace:*",
     "start-server-and-test": "^2.0.0",
     "tsconfig": "workspace:*",
-    "typescript": "^5.0.0"
+    "typescript": "^5.2.2"
   }
 }
