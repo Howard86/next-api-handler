@@ -8,7 +8,7 @@ orbs:
 jobs:
   unit-test-and-check-coverage:
     docker:
-      - image: cimg/node:18.17.1
+      - image: cimg/node:20.8.1
     resource_class: large
 
     steps:
