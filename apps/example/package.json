@@ -14,7 +14,7 @@
     "e2e:headless": "start-server-and-test start http://localhost:3000 cypress:headless"
   },
   "dependencies": {
-    "next": "^13.4.19",
+    "next": "^14.0.0",
     "next-api-handler": "workspace:*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
