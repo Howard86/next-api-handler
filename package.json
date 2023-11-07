@@ -20,7 +20,7 @@
   "devDependencies": {
     "@commitlint/cli": "^17.7.1",
     "@commitlint/config-conventional": "^17.7.0",
-    "cspell": "^7.3.6",
+    "cspell": "^8.0.0",
     "cypress": "^13.2.0",
     "eslint": "^8.49.0",
     "gh-pages": "^6.0.0",
