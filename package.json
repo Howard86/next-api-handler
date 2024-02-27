@@ -18,8 +18,8 @@
     "prepare": "husky install"
   },
   "devDependencies": {
-    "@commitlint/cli": "^17.7.1",
-    "@commitlint/config-conventional": "^17.7.0",
+    "@commitlint/cli": "^19.0.0",
+    "@commitlint/config-conventional": "^19.0.0",
     "cspell": "^7.3.6",
     "cypress": "^13.2.0",
     "eslint": "^8.49.0",
