@@ -16,12 +16,12 @@
   "dependencies": {
     "next": "^13.4.19",
     "next-api-handler": "workspace:*",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.6.0",
-    "@types/react": "^18.2.21",
+    "@types/react": "^19.0.0",
     "cypress": "^13.2.0",
     "eslint-config-custom": "workspace:*",
     "start-server-and-test": "^2.0.0",
